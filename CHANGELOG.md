@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.10](https://github.com/zextras/carbonio-tasks-ui/compare/v0.0.9...v0.0.10) (2024-04-10)
+
+
+### Features
+
+* change module icon ([f47d0c5](https://github.com/zextras/carbonio-tasks-ui/commit/f47d0c527ad1c7024811cae87f6773326a593df5)), closes [#77](https://github.com/zextras/carbonio-tasks-ui/issues/77)
+
+
+### Bug Fixes
+
+* avoid to update badge while setting state ([f8bc195](https://github.com/zextras/carbonio-tasks-ui/commit/f8bc195467ff38cc4b156fc0d2fcc26f821828de)), closes [#83](https://github.com/zextras/carbonio-tasks-ui/issues/83)
+* handle reminders set for over the timeout limit ([0952156](https://github.com/zextras/carbonio-tasks-ui/commit/09521564671a46ac8a845c6c09dfec5f00cab5a5)), closes [#72](https://github.com/zextras/carbonio-tasks-ui/issues/72)
+
 ### [0.0.9](https://github.com/zextras/carbonio-tasks-ui/compare/v0.0.8...v0.0.9) (2024-02-15)
 
 ### [0.0.8](https://github.com/zextras/carbonio-tasks-ui/compare/v0.0.7...v0.0.8) (2024-01-10)
