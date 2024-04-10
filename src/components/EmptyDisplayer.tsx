@@ -27,11 +27,11 @@ export const EmptyDisplayer = ({ translationKey }: EmptyDisplayerProps): React.J
 				? {
 						title: 'You have reached the maximum number of tasks.',
 						message: 'Delete your previous tasks to create more.'
-				  }
+					}
 				: {
 						title: 'Start organizing your day.',
 						message: 'Click the "NEW" button to create a Task.'
-				  }
+					}
 		]
 	});
 

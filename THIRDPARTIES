@@ -7,7 +7,7 @@ MIT License (MIT) applies to:
 @babel/preset-typescript, Copyright (c) 2014-present Sebastian McKenzie and other contributors
 @commitlint/cli, Copyright (c) 2016 - present Mario Nebl
 @commitlint/config-conventional, Copyright (c) 2016 - present Mario Nebl
-@faker-js/faker, Copyright (c) 2022; faker.js - Copyright (c) 2020 Marak Squires
+@faker-js/faker, Copyright (c) 2022-2024; faker.js - Copyright (c) 2020 Marak Squires
 @graphql-codegen/add, Copyright (c) 2016 Dotan Simha
 @graphql-codegen/cli, Copyright (c) 2016 Dotan Simha
 @graphql-codegen/fragment-matcher, Copyright (c) 2016 Dotan Simha
@@ -17,7 +17,6 @@ MIT License (MIT) applies to:
 @graphql-codegen/typescript, Copyright (c) 2016 Dotan Simha
 @graphql-eslint/eslint-plugin, Copyright (c) 2022 Dimitri POSTOLOV
 @graphql-tools/jest-transform, Copyright (c) 2020 The Guild, Inc.
-@mswjs/interceptors, Copyright (c) 2018–present Artem Zakharchenko
 @testing-library/dom, Copyright (c) 2017 Kent C. Dodds
 @testing-library/jest-dom, Copyright (c) 2017 Kent C. Dodds
 @testing-library/react, Copyright (c) 2017 Kent C. Dodds
@@ -31,7 +30,7 @@ MIT License (MIT) applies to:
 @types/uuid, Copyright (c) Microsoft Corporation.
 babel-plugin-i18next-extract, Copyright 2019 Gilbert Gilb's <gilbsgilbert@gmail.com>
 babel-plugin-styled-components, Copyright (c) 2016-present Vladimir Danchenkov and Maximilian Stoiber
-core-js, Copyright (c) 2014-2023 Denis Pushkarev
+core-js, Copyright (c) 2014-2024 Denis Pushkarev
 date-fns, Copyright (c) 2021 Sasha Koss and Lesha Koss https://kossnocorp.mit-license.org
 eslint-plugin-notice, Copyright (c) 2017 Nick Deis
 graphql-tag, Copyright (c) 2021 Apollo Graph, Inc. (Formerly Meteor Development Group, Inc.)
@@ -42,17 +41,17 @@ i18next, Copyright (c) 2022 i18next
 is-ci, Copyright (c) 2016-2021 Thomas Watson Steen
 jest-environment-jsdom, Copyright (c) Meta Platforms, Inc. and affiliates.
 jest-fail-on-console, Copyright (c) 2022 Valentin Hervieu
-jest-styled-components, Copyright (c) 2017 Michele Bertoli
+jest-styled-components, Copyright (c) 2017 - present Michele Bertoli
 jest, Copyright (c) Meta Platforms, Inc. and affiliates.
 lodash, Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
 moment, Copyright (c) JS Foundation and other contributors
 msw, Copyright (c) 2018–present Artem Zakharchenko
-node-fetch, Copyright (c) 2016 David Frank
 react-dom, Copyright (c) Facebook, Inc. and its affiliates.
 react-i18next, Copyright (c) 2023 i18next
 react-router-dom, Copyright (c) React Training 2015-2019. Copyright (c) Remix Software 2020-2022
 react, Copyright (c) Facebook, Inc. and its affiliates.
 styled-components, Copyright (c) 2016-present Glen Maddern and Maximilian Stoiber
+ts-node, Copyright (c) 2014 Blake Embrey (hello@blakeembrey.com)
 uuid, Copyright (c) 2010-2020 Robert Kieffer and other contributors
 
 MIT License

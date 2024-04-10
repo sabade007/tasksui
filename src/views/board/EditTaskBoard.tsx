@@ -21,7 +21,7 @@ const EditTaskBoard = (): React.JSX.Element => {
 	const { data: getTaskResult } = useQuery(GetTaskDocument, {
 		errorPolicy: 'all',
 		variables: {
-			taskId: taskId || ''
+			taskId: taskId ?? ''
 		},
 		skip: !taskId
 	});
@@ -47,36 +47,37 @@ const EditTaskBoard = (): React.JSX.Element => {
 
 	const onConfirm = useCallback<CommonTaskBoardProps['onConfirm']>(
 		({ title, priority, description, reminderAt, reminderAllDay, enableReminder }) => {
-			if (taskId) {
-				const newTitle = title !== initialTitle ? title : undefined;
-				const newPriority = priority !== initialPriority ? priority : undefined;
-				const newDescription =
-					trim(description).length > 0 && description !== initialDescription
-						? trim(description)
-						: undefined;
-				const disablingReminder = !enableReminder && !!initialReminderAt;
-				const reminderEnabledAndModified =
-					enableReminder &&
-					(initialReminderAt !== reminderAt.getTime() || initialReminderAllDay !== reminderAllDay);
-				const newReminderAt = disablingReminder
-					? 0
-					: (reminderEnabledAndModified && enableReminder && reminderAt.getTime()) || undefined;
-				const newReminderAllDay =
-					disablingReminder || reminderEnabledAndModified ? reminderAllDay || false : undefined;
-				updateTaskMutation({
-					variables: {
-						updateTask: {
-							id: taskId,
-							description: newDescription,
-							priority: newPriority,
-							title: newTitle,
-							reminderAt: newReminderAt,
-							reminderAllDay: newReminderAllDay
-						}
-					}
-				});
-				closeBoard();
+			if (!taskId) {
+				return;
 			}
+			const newTitle = title !== initialTitle ? title : undefined;
+			const newPriority = priority !== initialPriority ? priority : undefined;
+			const newDescription =
+				trim(description).length > 0 && description !== initialDescription
+					? trim(description)
+					: undefined;
+			const disablingReminder = !enableReminder && !!initialReminderAt;
+			const reminderEnabledAndModified =
+				enableReminder &&
+				(initialReminderAt !== reminderAt.getTime() || initialReminderAllDay !== reminderAllDay);
+			const newReminderAt = disablingReminder
+				? 0
+				: (reminderEnabledAndModified && enableReminder && reminderAt.getTime()) || undefined;
+			const newReminderAllDay =
+				disablingReminder || reminderEnabledAndModified ? reminderAllDay || false : undefined;
+			updateTaskMutation({
+				variables: {
+					updateTask: {
+						id: taskId,
+						description: newDescription,
+						priority: newPriority,
+						title: newTitle,
+						reminderAt: newReminderAt,
+						reminderAllDay: newReminderAllDay
+					}
+				}
+			});
+			closeBoard();
 		},
 		[
 			closeBoard,
@@ -96,9 +97,9 @@ const EditTaskBoard = (): React.JSX.Element => {
 				<CommonTaskBoard
 					initialTitle={initialTitle}
 					initialPriority={initialPriority}
-					initialDescription={initialDescription || ''}
+					initialDescription={initialDescription ?? ''}
 					initialEnableReminder={!!initialReminderAt}
-					initialIsAllDay={initialReminderAllDay || false}
+					initialIsAllDay={initialReminderAllDay ?? false}
 					initialDate={initialReminderAt ? new Date(initialReminderAt) : new Date()}
 					onConfirm={onConfirm}
 					confirmLabel={t('board.confirmButton.edit', 'edit')}

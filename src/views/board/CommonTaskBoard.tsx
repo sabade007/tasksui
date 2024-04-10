@@ -14,7 +14,6 @@ import {
 	DateTimePicker,
 	type DateTimePickerProps,
 	Icon,
-	IconButton,
 	type IconProps,
 	Input,
 	type InputProps,
@@ -28,8 +27,7 @@ import {
 	type TextAreaProps
 } from '@zextras/carbonio-design-system';
 import { t, useBoardHooks } from '@zextras/carbonio-shell-ui';
-import { find, noop, size, trim } from 'lodash';
-import styled from 'styled-components';
+import { find, size, trim } from 'lodash';
 
 import { CustomSelectLabelFactory } from '../../components/CustomSelectLabelFactory';
 import { Text } from '../../components/Text';
@@ -40,10 +38,6 @@ import {
 	TIME_SPECIFIC_DATE_TIME_PICKER_DATE_FORMAT
 } from '../../constants';
 import { Priority } from '../../gql/types';
-
-const CustomIconButton = styled(IconButton)`
-	padding: 0.125rem;
-`;
 
 const PrioritySelectionItem = ({
 	icon,
@@ -311,7 +305,7 @@ export const CommonTaskBoard = ({
 								? t(
 										'board.input.description.error.label',
 										'Maximum length allowed is 1024 characters'
-								  )
+									)
 								: undefined
 						}
 					/>
@@ -342,30 +336,14 @@ export const CommonTaskBoard = ({
 								? ALL_DAY_DATE_TIME_PICKER_DATE_FORMAT
 								: TIME_SPECIFIC_DATE_TIME_PICKER_DATE_FORMAT
 						}
-						// TODO remove when CDS-140 is done
-						customInput={
-							<Input
-								backgroundColor={'gray5'}
-								label={t('board.dateTimePicker.reminder.label', 'Reminder')}
-								CustomIcon={(): React.JSX.Element => (
-									<CustomIconButton
-										icon={'CalendarOutline'}
-										size={'large'}
-										backgroundColor={'transparent'}
-										onClick={noop}
-									/>
-								)}
-								borderColor={'gray3'}
-								hasError={date === null}
-								description={
-									date === null
-										? t(
-												'board.dateTimePicker.description.error.label',
-												'The reminder option is enabled, set date and time for it or disable the reminder'
-										  )
-										: undefined
-								}
-							/>
+						hasError={date === null}
+						errorLabel={
+							date === null
+								? t(
+										'board.dateTimePicker.description.error.label',
+										'The reminder option is enabled, set date and time for it or disable the reminder'
+									)
+								: undefined
 						}
 					/>
 				)}
@@ -388,7 +366,7 @@ export const CommonTaskBoard = ({
 							? t(
 									'board.textArea.description.error.label',
 									'Maximum length allowed is 4096 characters'
-							  )
+								)
 							: undefined
 					}
 				/>

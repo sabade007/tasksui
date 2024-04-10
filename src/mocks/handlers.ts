@@ -18,17 +18,19 @@ import {
 	type GetTaskQuery,
 	type GetTaskQueryVariables,
 	type UpdateTaskMutation,
-	type UpdateTaskMutationVariables
+	type UpdateTaskMutationVariables,
+	FindTasksDocument,
+	GetTaskDocument,
+	UpdateTaskStatusDocument,
+	UpdateTaskDocument
 } from '../gql/types';
 
-const handlers: RequestHandler[] = [
-	graphql.query<FindTasksQuery, FindTasksQueryVariables>('findTasks', findTasks),
-	graphql.query<GetTaskQuery, GetTaskQueryVariables>('getTask', getTask),
+export const handlers: RequestHandler[] = [
+	graphql.query<FindTasksQuery, FindTasksQueryVariables>(FindTasksDocument, findTasks),
+	graphql.query<GetTaskQuery, GetTaskQueryVariables>(GetTaskDocument, getTask),
 	graphql.mutation<UpdateTaskStatusMutation, UpdateTaskStatusMutationVariables>(
-		'updateTaskStatus',
+		UpdateTaskStatusDocument,
 		updateTaskStatus
 	),
-	graphql.mutation<UpdateTaskMutation, UpdateTaskMutationVariables>('updateTask', updateTask)
+	graphql.mutation<UpdateTaskMutation, UpdateTaskMutationVariables>(UpdateTaskDocument, updateTask)
 ];
-
-export default handlers;

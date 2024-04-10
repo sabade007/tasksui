@@ -7,12 +7,12 @@
 import React from 'react';
 
 import { faker } from '@faker-js/faker';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import * as shell from '@zextras/carbonio-shell-ui';
 import addMonths from 'date-fns/addMonths';
 import getDate from 'date-fns/getDate';
 import subDays from 'date-fns/subDays';
-import { graphql } from 'msw';
+import { graphql, type GraphQLResponseResolver, HttpResponse } from 'msw';
 
 import EditTaskBoard from './EditTaskBoard';
 import { ICON_REGEXP } from '../../constants/tests';
@@ -29,8 +29,10 @@ import {
 } from '../../gql/types';
 import server from '../../mocks/server';
 import { mockGetTask, mockUpdateTask, populateTask } from '../../mocks/utils';
-import { type GraphQLResponseResolver } from '../../types/commons';
 import { setup } from '../../utils/testUtils';
+
+type GetTaskHandler = GraphQLResponseResolver<GetTaskQuery, GetTaskQueryVariables>;
+type UpdateTaskHandler = GraphQLResponseResolver<UpdateTaskMutation, UpdateTaskMutationVariables>;
 
 describe('Edit task board', () => {
 	const checkboxLabelText = /Remind me at every login throughout the day/i;
@@ -202,7 +204,8 @@ describe('Edit task board', () => {
 			const editButton = screen.getByRole('button', { name: /edit/i });
 			const descriptionInput = screen.getByRole('textbox', { name: /description/i });
 			const maxLengthDescription = faker.string.alpha({ length: 4096 });
-			await user.type(descriptionInput, maxLengthDescription);
+			await user.click(descriptionInput);
+			await user.paste(maxLengthDescription);
 			expect(descriptionInput).toHaveValue(maxLengthDescription);
 			expect(editButton).toBeEnabled();
 			expect(
@@ -311,23 +314,20 @@ describe('Edit task board', () => {
 					reminderAt: new Date().getTime(),
 					reminderAllDay: true
 				});
-
-				const getTaskHandler: jest.MockedFunction<
-					GraphQLResponseResolver<GetTaskQuery, GetTaskQueryVariables>
-				> = jest.fn((req, res, ctx) =>
-					res(
-						ctx.data({
+				const getTaskHandler = jest.fn<ReturnType<GetTaskHandler>, Parameters<GetTaskHandler>>(() =>
+					HttpResponse.json({
+						data: {
 							getTask: task
-						})
-					)
+						}
+					})
 				);
-
-				const updateTaskHandler: jest.MockedFunction<
-					GraphQLResponseResolver<UpdateTaskMutation, UpdateTaskMutationVariables>
-				> = jest.fn((req, res, context) => {
-					const { updateTask } = req.variables;
-					return res(
-						context.data({
+				const updateTaskHandler = jest.fn<
+					ReturnType<UpdateTaskHandler>,
+					Parameters<UpdateTaskHandler>
+				>(({ variables }) => {
+					const { updateTask } = variables;
+					return HttpResponse.json({
+						data: {
 							updateTask: {
 								id: updateTask.id,
 								status: updateTask.status || task.status,
@@ -339,8 +339,8 @@ describe('Edit task board', () => {
 								createdAt: task.createdAt,
 								__typename: 'Task'
 							}
-						})
-					);
+						}
+					});
 				});
 
 				server.use(
@@ -350,6 +350,9 @@ describe('Edit task board', () => {
 				spyUseBoard(task.id);
 				const { user } = setup(<EditTaskBoard />);
 
+				await act(async () => {
+					await jest.advanceTimersToNextTimerAsync();
+				});
 				await waitFor(() => expect(getTaskHandler).toHaveBeenCalled());
 				await awaitEditBoardRender();
 
@@ -364,11 +367,10 @@ describe('Edit task board', () => {
 						variables: {
 							updateTask: expected
 						}
-					}),
-					expect.anything(),
-					expect.anything()
+					})
 				);
 			});
+
 			test('When the reminder is updated modifying the reminderAt, the mutation is called with reminderAt equals to the new value and reminderAllDay equals to previous value', async () => {
 				// chosen date is the 1st of next month
 				const nextM = addMonths(new Date().setMilliseconds(0), 1);
@@ -380,23 +382,20 @@ describe('Edit task board', () => {
 					reminderAt: new Date().getTime(),
 					reminderAllDay: previousReminderAllDayValue
 				});
-
-				const getTaskHandler: jest.MockedFunction<
-					GraphQLResponseResolver<GetTaskQuery, GetTaskQueryVariables>
-				> = jest.fn((req, res, ctx) =>
-					res(
-						ctx.data({
+				const getTaskHandler = jest.fn<ReturnType<GetTaskHandler>, Parameters<GetTaskHandler>>(() =>
+					HttpResponse.json({
+						data: {
 							getTask: task
-						})
-					)
+						}
+					})
 				);
-
-				const updateTaskHandler: jest.MockedFunction<
-					GraphQLResponseResolver<UpdateTaskMutation, UpdateTaskMutationVariables>
-				> = jest.fn((req, res, context) => {
-					const { updateTask } = req.variables;
-					return res(
-						context.data({
+				const updateTaskHandler = jest.fn<
+					ReturnType<UpdateTaskHandler>,
+					Parameters<UpdateTaskHandler>
+				>(({ variables }) => {
+					const { updateTask } = variables;
+					return HttpResponse.json({
+						data: {
 							updateTask: {
 								id: updateTask.id,
 								status: updateTask.status || task.status,
@@ -408,8 +407,8 @@ describe('Edit task board', () => {
 								createdAt: task.createdAt,
 								__typename: 'Task'
 							}
-						})
-					);
+						}
+					});
 				});
 
 				server.use(
@@ -419,6 +418,9 @@ describe('Edit task board', () => {
 				spyUseBoard(task.id);
 				const { user } = setup(<EditTaskBoard />);
 
+				await act(async () => {
+					await jest.advanceTimersToNextTimerAsync();
+				});
 				await waitFor(() => expect(getTaskHandler).toHaveBeenCalled());
 				await awaitEditBoardRender();
 
@@ -439,9 +441,7 @@ describe('Edit task board', () => {
 						variables: {
 							updateTask: expected
 						}
-					}),
-					expect.anything(),
-					expect.anything()
+					})
 				);
 			});
 			test('When the reminder is updated modifying the reminderAllDay, the mutation is called with reminderAllDay equals to the new value and reminderAt equals to previous value', async () => {
@@ -451,23 +451,20 @@ describe('Edit task board', () => {
 					reminderAt: previousReminderAtValue.getTime(),
 					reminderAllDay: false
 				});
-
-				const getTaskHandler: jest.MockedFunction<
-					GraphQLResponseResolver<GetTaskQuery, GetTaskQueryVariables>
-				> = jest.fn((req, res, ctx) =>
-					res(
-						ctx.data({
+				const getTaskHandler = jest.fn<ReturnType<GetTaskHandler>, Parameters<GetTaskHandler>>(() =>
+					HttpResponse.json({
+						data: {
 							getTask: task
-						})
-					)
+						}
+					})
 				);
-
-				const updateTaskHandler: jest.MockedFunction<
-					GraphQLResponseResolver<UpdateTaskMutation, UpdateTaskMutationVariables>
-				> = jest.fn((req, res, context) => {
-					const { updateTask } = req.variables;
-					return res(
-						context.data({
+				const updateTaskHandler = jest.fn<
+					ReturnType<UpdateTaskHandler>,
+					Parameters<UpdateTaskHandler>
+				>(({ variables }) => {
+					const { updateTask } = variables;
+					return HttpResponse.json({
+						data: {
 							updateTask: {
 								id: updateTask.id,
 								status: updateTask.status || task.status,
@@ -479,8 +476,8 @@ describe('Edit task board', () => {
 								createdAt: task.createdAt,
 								__typename: 'Task'
 							}
-						})
-					);
+						}
+					});
 				});
 
 				server.use(
@@ -490,6 +487,9 @@ describe('Edit task board', () => {
 				spyUseBoard(task.id);
 				const { user } = setup(<EditTaskBoard />);
 
+				await act(async () => {
+					await jest.advanceTimersToNextTimerAsync();
+				});
 				await waitFor(() => expect(getTaskHandler).toHaveBeenCalled());
 				await awaitEditBoardRender();
 
@@ -508,9 +508,7 @@ describe('Edit task board', () => {
 						variables: {
 							updateTask: expected
 						}
-					}),
-					expect.anything(),
-					expect.anything()
+					})
 				);
 			});
 		});

@@ -50,7 +50,7 @@ const SecondaryBarView = ({ expanded }: { expanded: boolean }): React.JSX.Elemen
 				items: [
 					{
 						id: 'id2',
-						icon: 'ListViewOutline',
+						icon: 'CheckmarkCircle2Outline',
 						label: t('secondaryBar.allTasks', 'All Tasks'),
 						onClick: (ev): void => {
 							ev.stopPropagation();

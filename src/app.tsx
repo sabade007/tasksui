@@ -75,7 +75,7 @@ const App = (): React.ReactNode => {
 			position: 600,
 			visible: true,
 			label: appNameLabel,
-			primaryBar: 'ListViewOutline',
+			primaryBar: 'CheckmarkCircle2Outline',
 			secondaryBar: SecondaryBarView,
 			appView: AppView
 		});
@@ -99,7 +99,7 @@ const App = (): React.ReactNode => {
 			action: () => ({
 				id: 'new-task',
 				label: t('label.new', 'New Task'),
-				icon: 'ListViewOutline',
+				icon: 'CheckmarkCircle2Outline',
 				onClick: (): void => {
 					addBoard({ url: `${TASKS_ROUTE}/new`, title: t('board.newTask.title', 'New Task') });
 				},

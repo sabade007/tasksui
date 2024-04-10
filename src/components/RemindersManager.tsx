@@ -5,7 +5,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useApolloClient, useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { Modal } from '@zextras/carbonio-design-system';
 import { getNotificationManager, updatePrimaryBadge } from '@zextras/carbonio-shell-ui';
 import { isAfter, isBefore, isToday, startOfDay } from 'date-fns';
@@ -13,6 +13,7 @@ import {
 	chain,
 	cloneDeep,
 	differenceBy,
+	filter,
 	find,
 	findIndex,
 	flatMap,
@@ -32,9 +33,8 @@ import { useLocation } from 'react-router-dom';
 
 import { ReminderModalContent } from './ReminderModalContent';
 import { ReminderModalFooter } from './ReminderModalFooter';
-import { TASKS_ROUTE } from '../constants';
+import { REMINDER_TIMEOUT_LIMIT, REMINDERS_INTERVAL_UPDATE, TASKS_ROUTE } from '../constants';
 import { FindTasksDocument, Status, type Task, UpdateTaskStatusDocument } from '../gql/types';
-import { useActiveItem } from '../hooks/useActiveItem';
 import { debounceWithAllArgs, formatDateFromTimestamp } from '../utils';
 
 type TaskWithReminder = Pick<Task, 'id' | 'title' | 'priority' | 'reminderAllDay' | 'status'> & {
@@ -42,24 +42,26 @@ type TaskWithReminder = Pick<Task, 'id' | 'title' | 'priority' | 'reminderAllDay
 };
 
 type ReminderEntity = TaskWithReminder & {
-	_reminderTimeout: NodeJS.Timeout | null;
+	_reminderTimeout: NodeJS.Timeout | boolean;
 	getKey(): string;
 	/** Whether the reminder is within the range of time inside which it has to be shown to the user */
 	isVisible(): boolean;
 	/** Whether the reminder is valid to trigger a notification */
 	isValid(): boolean;
 	/** Start the timeout for the reminder */
-	startTimeout(callback: (...reminders: ReminderEntity[]) => void): NodeJS.Timeout | null;
+	startTimeout(callback: (...reminders: ReminderEntity[]) => void): NodeJS.Timeout | boolean;
 	/** Clear the timeout for the reminder */
 	clearTimout(): void;
 	/** Identify reminders which have already been shown from the ones which have not */
 	hasAlreadyBeenReminded(): boolean;
+	/** Identify reminders which have a timeout not yet started */
+	isFutureReminder(): boolean;
 };
 
 function buildReminderEntity(task: TaskWithReminder): ReminderEntity {
 	return {
 		...task,
-		_reminderTimeout: null,
+		_reminderTimeout: false,
 		getKey(): string {
 			return formatDateFromTimestamp(task.reminderAt, {
 				includeTime: task.reminderAllDay !== true
@@ -73,31 +75,38 @@ function buildReminderEntity(task: TaskWithReminder): ReminderEntity {
 		},
 		isValid(): boolean {
 			// reminder could trigger a notification if it is set for the current day, but also for the future,
-			// because session could be open at midnight, and at that moment the reminders of
+			// because the session could be open at midnight, and at that moment the reminders of
 			// tomorrow should be shown instead of the one of today
 			return isToday(task.reminderAt) || isAfter(task.reminderAt, Date.now());
 		},
-		startTimeout(callback): NodeJS.Timeout | null {
+		startTimeout(callback): NodeJS.Timeout | boolean {
 			// start a timeout to trigger the reminder only when the reminder is in the future or in the current moment
 			const reminderTime = task.reminderAllDay
 				? startOfDay(task.reminderAt).getTime()
 				: task.reminderAt;
 			const epochDiffFromNow = reminderTime - Date.now();
 			if (epochDiffFromNow >= 0) {
-				this._reminderTimeout = setTimeout(() => {
-					callback(this);
-				}, epochDiffFromNow);
+				if (epochDiffFromNow <= REMINDER_TIMEOUT_LIMIT) {
+					this._reminderTimeout = setTimeout(() => {
+						callback(this);
+					}, epochDiffFromNow);
+				} else {
+					this._reminderTimeout = true;
+				}
 			}
 			return this._reminderTimeout;
 		},
 		clearTimout(): void {
-			if (this._reminderTimeout) {
+			if (typeof this._reminderTimeout !== 'boolean') {
 				clearTimeout(this._reminderTimeout);
-				this._reminderTimeout = null;
+				this._reminderTimeout = false;
 			}
 		},
 		hasAlreadyBeenReminded(): boolean {
-			return this._reminderTimeout === null;
+			return this._reminderTimeout === false;
+		},
+		isFutureReminder(): boolean {
+			return this._reminderTimeout === true;
 		}
 	} satisfies ReminderEntity;
 }
@@ -109,8 +118,6 @@ function isTaskWithReminder(task: Partial<Task> | null | undefined): task is Tas
 export const RemindersManager = (): React.JSX.Element => {
 	const [t] = useTranslation();
 	const notificationManager = getNotificationManager();
-	const apolloClient = useApolloClient();
-	const { isActive, removeActive } = useActiveItem();
 
 	// query used to register new task when the list changes
 	const { data: remindersData, previousData: remindersPreviousData } = useQuery(FindTasksDocument, {
@@ -125,12 +132,14 @@ export const RemindersManager = (): React.JSX.Element => {
 		variables: { status: Status.Open }
 	});
 	const [updateTaskStatus] = useMutation(UpdateTaskStatusDocument);
-	const [isModalOpen, setModalOpen] = useState<boolean>(false);
-	// array of group of reminders. Each group represents a date block,
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+	// Array of group of reminders.
+	// Each group represents a date block,
 	// with the date formatted and the list of reminders for that date
 	const [modalReminders, setModalReminders] = useState<
 		Array<{ date: string; reminders: TaskWithReminder[] }>
 	>([]);
+	const modalRemindersRef = useRef<Array<{ date: string; reminders: TaskWithReminder[] }>>([]);
 	// map of tasks keyed by reminder date (formatted)
 	const remindersByDateRef = useRef<Record<string, ReminderEntity[]>>({});
 	const location = useLocation();
@@ -138,6 +147,8 @@ export const RemindersManager = (): React.JSX.Element => {
 	const isTasksView = useMemo(() => location.pathname.includes(TASKS_ROUTE), [location.pathname]);
 	const isTasksViewRef = useRef<boolean>(isTasksView);
 	const isBadgeVisibleRef = useRef<boolean>(false);
+	const remindersToStartRef = useRef<ReminderEntity[]>([]);
+	const updateTimeoutsIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
 	useEffect(() => {
 		isTasksViewRef.current = isTasksView;
@@ -145,11 +156,12 @@ export const RemindersManager = (): React.JSX.Element => {
 
 	const getVisibleReminders = useCallback(
 		() =>
-			// Extract all reminders which have to be shown and order them by date ascending.
-			// Exclude from this list the ones which have an active timer
+			// Extract all reminders that have to be shown and order them by date ascending.
+			// Exclude from this list the ones that have an active timer
 			chain(remindersByDateRef.current)
 				.reduce<typeof modalReminders>((accumulator, reminderGroup, dateKey) => {
-					// show reminders which are visible (check only first one since they are grouped by datetime)
+					// show reminders which are visible
+					// (check only the first one since they are grouped by datetime)
 					if (reminderGroup.length > 0 && reminderGroup[0].isVisible()) {
 						// Pick only reminders which cannot trigger a notification anymore. In other words,
 						// filter out reminders with an active timout, which need to be shown in a different group
@@ -165,7 +177,7 @@ export const RemindersManager = (): React.JSX.Element => {
 					}
 					return accumulator;
 				}, [])
-				// sort reminders by date. All day entries are shown as first group for the day
+				// Sort reminders by date. All-day entries are shown as first group for the day
 				.sortBy((reminderModalEntry) => reminderModalEntry.date)
 				.value(),
 		[]
@@ -174,7 +186,7 @@ export const RemindersManager = (): React.JSX.Element => {
 	const notifyReminders = useCallback(
 		(badgeCount: number | undefined) => {
 			notificationManager.notify({ showPopup: false, playSound: true });
-			// show badge only if view is not within tasks module
+			// show badge only if view is not within "tasks" module
 			if (!isTasksViewRef.current) {
 				updatePrimaryBadge(
 					{ show: true, count: badgeCount, showCount: badgeCount !== undefined },
@@ -188,12 +200,12 @@ export const RemindersManager = (): React.JSX.Element => {
 
 	const _showReminder = useCallback(
 		(...reminders: ReminderEntity[]): void => {
-			setModalOpen((alreadyOpen) => {
+			setIsModalOpen((alreadyOpen) => {
 				if (alreadyOpen) {
 					// Distinguish between new reminders and already existing reminders:
-					// place new reminders on bottom of the existing list,
+					// place new reminders on the bottom of the existing list,
 					// and keep already existing reminders at same position. For these, update only the status
-					// (for now), in order to avoid having updated titles under a wrong reminder date.
+					// (for now), to avoid having updated titles under a wrong reminder date.
 					setModalReminders((prevState) => {
 						const newState = cloneDeep(prevState);
 						const newReminders: ReminderEntity[] = [];
@@ -218,10 +230,6 @@ export const RemindersManager = (): React.JSX.Element => {
 							reminders: reminderGroup
 						}));
 						newState.push(...newReminderEntries);
-						if (newReminders.length > 0) {
-							// notify with a sound the adding of a new reminder in the modal
-							notifyReminders(flatMap(newState, (reminderGroup) => reminderGroup.reminders).length);
-						}
 						return newState;
 					});
 					// keep modal open
@@ -238,12 +246,6 @@ export const RemindersManager = (): React.JSX.Element => {
 				setModalReminders(newModalReminders);
 				// open modal if there is something to show
 				const shouldOpenModal = newModalReminders.length > 0;
-				if (shouldOpenModal) {
-					// notify with a sound the opening of the modal
-					notifyReminders(
-						flatMap(newModalReminders, (reminderGroup) => reminderGroup.reminders).length
-					);
-				}
 				// reset timout for reminders shown with this call so that they result as already seen in next modals
 				forEach(reminders, (reminder) => {
 					reminder.clearTimout();
@@ -251,8 +253,23 @@ export const RemindersManager = (): React.JSX.Element => {
 				return shouldOpenModal;
 			});
 		},
-		[getVisibleReminders, notifyReminders]
+		[getVisibleReminders]
 	);
+
+	useEffect(() => {
+		const diffNewDate = differenceBy(
+			modalReminders,
+			modalRemindersRef.current,
+			(item) => item.date
+		);
+
+		modalRemindersRef.current = modalReminders;
+
+		if (diffNewDate.length > 0) {
+			// notify with a sound the opening of the modal or the adding of a new reminder in the modal
+			notifyReminders(flatMap(modalReminders, (reminderGroup) => reminderGroup.reminders).length);
+		}
+	}, [modalReminders, notifyReminders]);
 
 	const showReminderDebounced = useMemo(() => debounceWithAllArgs(_showReminder), [_showReminder]);
 
@@ -263,7 +280,7 @@ export const RemindersManager = (): React.JSX.Element => {
 			if (remindersByDate[dateKey] === undefined) {
 				remindersByDate[dateKey] = [];
 			}
-			// add reminder to the map only if it is not completed, and it is not already registered
+			// add reminder to the map only if it is not completed, and it is not yet registered
 			if (
 				reminder.status !== Status.Complete &&
 				!some(
@@ -296,60 +313,67 @@ export const RemindersManager = (): React.JSX.Element => {
 		}
 	}, []);
 
-	const updateRegisteredReminder = useCallback(
-		(reminder: ReminderEntity): void => {
-			const remindersByDate = remindersByDateRef.current;
-			// find the previous position of the reminder by searching inside all the entries.
+	const findRegisteredReminder = useCallback(
+		(
+			reminder: Pick<ReminderEntity, 'id'>
+		): { key: string; index: number } | { key: undefined; index: undefined } =>
+			// Find the previous position of the reminder by searching inside all the entries.
 			// Retrieve both the dateKey and the index with a "reduce" to make a single cycle.
 			// The two fields are both valued or both undefined, there cannot be a hybrid situation.
-			const { prevKey, prevIndex } = reduce<
-				typeof remindersByDate,
-				{ prevKey: string; prevIndex: number } | { prevKey: undefined; prevIndex: undefined }
+			reduce<
+				typeof remindersByDateRef.current,
+				{ key: string; index: number } | { key: undefined; index: undefined }
 			>(
-				remindersByDate,
+				remindersByDateRef.current,
 				(result, reminders, key) => {
 					const reminderIndex = findIndex(reminders, (item) => item.id === reminder.id);
 					if (reminderIndex >= 0) {
-						return { prevKey: key, prevIndex: reminderIndex };
+						return { key, index: reminderIndex };
 					}
 					return result;
 				},
-				{ prevKey: undefined, prevIndex: undefined }
-			);
+				{ key: undefined, index: undefined }
+			),
+		[]
+	);
 
+	const updateRegisteredReminder = useCallback(
+		(reminder: ReminderEntity): void => {
+			const remindersByDate = remindersByDateRef.current;
+			const { key: prevKey, index: prevIndex } = findRegisteredReminder(reminder);
 			const newDateKey = reminder.getKey();
-			if (prevKey && remindersByDate[prevKey] !== undefined && prevIndex >= 0) {
-				// if the reminder was truly registered
-				// clear the timeout of the previous object
-				remindersByDate[prevKey][prevIndex].clearTimout();
-				if (reminder.status !== Status.Complete) {
-					// if the status is still not complete, start the new timer
-					reminder.startTimeout(showReminderDebounced);
-					if (prevKey === newDateKey) {
-						// update the reminder keeping the same position if the key is not changed (reminderAt and reminderAllDay are not changed)
-						remindersByDate[prevKey][prevIndex] = reminder;
-					} else {
-						// otherwise clear the previous position and push the item to the new dateKey map
-						pullAt(remindersByDate[prevKey], prevIndex);
-						// delete the entry from the map if there is no reminder left for it
-						if (remindersByDate[prevKey].length === 0) {
-							delete remindersByDate[prevKey];
-						}
-						if (remindersByDate[newDateKey] === undefined) {
-							remindersByDate[newDateKey] = [];
-						}
-						remindersByDate[newDateKey].push(reminder);
-					}
-				} else {
-					// if the status has changed and now the task is completed, just clear the previous position
-					pullAt(remindersByDate[prevKey], prevIndex);
-				}
-			} else {
+			if (!prevKey || remindersByDate[prevKey] === undefined || prevIndex < 0) {
 				// if the reminder was not truly registered, register it
 				registerReminder(reminder);
+				return;
 			}
+			// if the reminder was truly registered
+			// clear the timeout of the previous object
+			remindersByDate[prevKey][prevIndex].clearTimout();
+			if (reminder.status === Status.Complete) {
+				// if the status has changed and now the task is completed, clear the previous position
+				pullAt(remindersByDate[prevKey], prevIndex);
+				return;
+			}
+			// if the status is still not complete, start the new timer
+			reminder.startTimeout(showReminderDebounced);
+			if (prevKey === newDateKey) {
+				// if the key is not changed (reminderAt and reminderAllDay are not changed) update the reminder keeping the same position
+				remindersByDate[prevKey][prevIndex] = reminder;
+				return;
+			}
+			// otherwise clear the previous position and push the item to the new dateKey map
+			pullAt(remindersByDate[prevKey], prevIndex);
+			// delete the entry from the map if there is no reminder left for it
+			if (remindersByDate[prevKey].length === 0) {
+				delete remindersByDate[prevKey];
+			}
+			if (remindersByDate[newDateKey] === undefined) {
+				remindersByDate[newDateKey] = [];
+			}
+			remindersByDate[newDateKey].push(reminder);
 		},
-		[registerReminder, showReminderDebounced]
+		[findRegisteredReminder, registerReminder, showReminderDebounced]
 	);
 
 	const registerRemindersFromTasks = useCallback(
@@ -367,7 +391,7 @@ export const RemindersManager = (): React.JSX.Element => {
 	);
 
 	useEffect(() => {
-		// init reminders manager by requesting all task with the lazy query
+		// init reminders manager by requesting all tasks with the lazy query
 		remindersByDateRef.current = {};
 		findRemindersLazyQuery()
 			.then((result) => {
@@ -376,7 +400,7 @@ export const RemindersManager = (): React.JSX.Element => {
 				}
 			})
 			.then(() => {
-				// show reminders on first load of the module
+				// show reminders on the first load of the module
 				showReminderDebounced();
 			});
 
@@ -387,16 +411,41 @@ export const RemindersManager = (): React.JSX.Element => {
 				reminder.clearTimout();
 			});
 			showReminderDebounced.cancel();
+			updateTimeoutsIntervalRef.current && clearInterval(updateTimeoutsIntervalRef.current);
 		};
 	}, [findRemindersLazyQuery, registerRemindersFromTasks, showReminderDebounced]);
+
+	const startFutureReminders = useCallback(() => {
+		forEach(remindersToStartRef.current, (reminder) => {
+			reminder.startTimeout(showReminderDebounced);
+		});
+	}, [showReminderDebounced]);
+
+	const checkForFutureRemindersToStart = useCallback(() => {
+		const remindersToStart = reduce<typeof remindersByDateRef.current, ReminderEntity[]>(
+			remindersByDateRef.current,
+			(accumulator, remindersForDate) =>
+				accumulator.concat(filter(remindersForDate, (reminder) => reminder.isFutureReminder())),
+			[]
+		);
+		remindersToStartRef.current = remindersToStart;
+		if (remindersToStart.length === 0 && updateTimeoutsIntervalRef.current) {
+			clearInterval(updateTimeoutsIntervalRef.current);
+		} else if (remindersToStart.length > 0 && !updateTimeoutsIntervalRef.current) {
+			updateTimeoutsIntervalRef.current = setInterval(
+				startFutureReminders,
+				REMINDERS_INTERVAL_UPDATE
+			);
+		}
+	}, [startFutureReminders]);
 
 	useEffect(() => {
 		// listen for changes to the list which don't trigger an update of the modal:
 		// - remove those which have been removed (compare previous data with current one)
 		// - register those which have been added (compare current data with previous one)
 		const removedTasks = differenceBy(
-			remindersPreviousData?.findTasks || [],
-			remindersData?.findTasks || [],
+			remindersPreviousData?.findTasks ?? [],
+			remindersData?.findTasks ?? [],
 			(task) => task?.id
 		);
 		removedTasks.forEach((task) => {
@@ -406,12 +455,14 @@ export const RemindersManager = (): React.JSX.Element => {
 			}
 		});
 		const addedTasks = differenceBy(
-			remindersData?.findTasks || [],
-			remindersPreviousData?.findTasks || [],
+			remindersData?.findTasks ?? [],
+			remindersPreviousData?.findTasks ?? [],
 			(task) => task?.id
 		);
 		registerRemindersFromTasks(addedTasks);
+		checkForFutureRemindersToStart();
 	}, [
+		checkForFutureRemindersToStart,
 		registerRemindersFromTasks,
 		remindersData?.findTasks,
 		remindersPreviousData?.findTasks,
@@ -423,8 +474,8 @@ export const RemindersManager = (): React.JSX.Element => {
 		// listen for changes to the list which need to trigger an update of the modal:
 		// - update registered reminders of those which reminder has been updated
 		const modifiedTasks = intersectionWith(
-			remindersData?.findTasks || [],
-			remindersPreviousData?.findTasks || [],
+			remindersData?.findTasks ?? [],
+			remindersPreviousData?.findTasks ?? [],
 			(newTask, prevTask) =>
 				newTask !== null &&
 				prevTask !== null &&
@@ -442,7 +493,9 @@ export const RemindersManager = (): React.JSX.Element => {
 		if (modifiedTasks.length > 0 && isModalOpen) {
 			showReminderDebounced(...updatedReminders);
 		}
+		checkForFutureRemindersToStart();
 	}, [
+		checkForFutureRemindersToStart,
 		isModalOpen,
 		remindersData?.findTasks,
 		remindersPreviousData?.findTasks,
@@ -456,7 +509,7 @@ export const RemindersManager = (): React.JSX.Element => {
 	);
 
 	const closeModalHandler = useCallback(() => {
-		setModalOpen(false);
+		setIsModalOpen(false);
 	}, []);
 
 	const completeTaskHandler = useCallback(

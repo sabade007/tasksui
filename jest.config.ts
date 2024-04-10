@@ -5,8 +5,9 @@
  */
 
 import { ApolloClient } from '@apollo/client';
+import type { Config } from 'jest';
 
-export default {
+const config: Config = {
 	// All imported modules in your tests should be mocked automatically
 	// automock: false,
 
@@ -25,20 +26,14 @@ export default {
 	// An array of glob patterns indicating a set of files for which coverage information should be collected
 	collectCoverageFrom: [
 		'src/**/*.{js,ts}(x)?',
-		'!**/*.test.ts(x)?', // exclude tests
-		'!src/**/mocks/**/*', // exclude msw handlers
-		'!src/mocks/**/*', // exclude msw handlers
-		'!**/(test|mock)*.ts(x)?', // exclude file which name starts with test or mock
-		'!src/**/types/*' // exclude types
+		'!**/(test|mock)*.ts(x)?' // exclude file which name starts with test or mock
 	],
 
 	// The directory where Jest should output its coverage files
 	coverageDirectory: 'coverage',
 
 	// An array of regexp pattern strings used to skip coverage collection
-	// coveragePathIgnorePatterns: [
-	//   "/node_modules/"
-	// ],
+	coveragePathIgnorePatterns: ['/node_modules/', 'src/tests', 'src/mocks', 'src/types'],
 
 	// Indicates which provider should be used to instrument code for coverage
 	coverageProvider: 'babel',
@@ -64,7 +59,8 @@ export default {
 
 	// The default configuration for fake timers
 	fakeTimers: {
-		enableGlobally: true
+		enableGlobally: true,
+		doNotFake: ['queueMicrotask']
 	},
 
 	// Force coverage collection from ignored files using an array of glob patterns
@@ -158,10 +154,22 @@ export default {
 	// snapshotSerializers: [],
 
 	// The test environment that will be used for testing
-	testEnvironment: 'jsdom',
+	/**
+	 * @note Override test environment to set again Request, Response, TextEncoder and other
+	 * fields
+	 * @see https://mswjs.io/docs/migrations/1.x-to-2.x#requestresponsetextencoder-is-not-defined-jest
+	 * @see https://github.com/mswjs/msw/issues/1916#issuecomment-1919965699
+	 */
+	testEnvironment: '<rootDir>/src/tests/jsdom-extended.ts',
 
 	// Options that will be passed to the testEnvironment
-	// testEnvironmentOptions: {},
+	testEnvironmentOptions: {
+		/**
+		 * @see https://mswjs.io/docs/migrations/1.x-to-2.x#cannot-find-module-mswnode-jsdom
+		 * @see https://github.com/mswjs/msw/issues/1786#issuecomment-1782559851
+		 */
+		customExportConditions: ['']
+	},
 
 	// Adds a location field to test results
 	// testLocationInResults: false,
@@ -207,3 +215,5 @@ export default {
 	// Whether to use watchman for file crawling
 	// watchman: true,
 };
+
+export default config;

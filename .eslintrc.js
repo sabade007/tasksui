@@ -27,7 +27,13 @@ module.exports = {
 	overrides: [
 		{
 			// enable eslint-plugin-testing-library rules or preset only for test files
-			files: ['**/+(test|jest)*.[jt]s?(x)', '**/types/commons.ts', '**/mocks/*', '**/gql/types.ts'],
+			files: [
+				'**/+(test|jest)*.[jt]s?(x)',
+				'**/types/commons.ts',
+				'**/mocks/**/*',
+				'**/gql/types.ts',
+				'**/tests/**/*'
+			],
 			rules: {
 				'import/no-extraneous-dependencies': 'off'
 			}

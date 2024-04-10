@@ -36,132 +36,123 @@ const ContentContainer = styled(Container)`
 	overflow: hidden;
 `;
 
-export const ListItemContent = React.memo<ListItemContentProps>(
-	({
-		id,
-		priority,
-		reminderAt,
-		title,
-		reminderAllDay,
-		onClick,
-		status,
-		// others props
-		visible
-	}) => {
-		const [t] = useTranslation();
-		const { isExpired: isReminderExpired } = useReminder(reminderAt, reminderAllDay);
-		const actions = useActions({ id, title, status });
+export const ListItemContent = React.memo<ListItemContentProps>(function ListItemContentFn({
+	id,
+	priority,
+	reminderAt,
+	title,
+	reminderAllDay,
+	onClick,
+	status,
+	// others props
+	visible
+}) {
+	const [t] = useTranslation();
+	const { isExpired: isReminderExpired } = useReminder(reminderAt, reminderAllDay);
+	const actions = useActions({ id, title, status });
 
-		const clickHandler = useCallback<React.MouseEventHandler<HTMLDivElement>>(() => {
-			onClick?.(id);
-		}, [id, onClick]);
+	const clickHandler = useCallback<React.MouseEventHandler<HTMLDivElement>>(() => {
+		onClick?.(id);
+	}, [id, onClick]);
 
-		const missingReminderLabel = useMemo(
-			() => t('tasksListItem.reminder.doNotRemindMe', 'Do not remind me'),
-			[t]
-		);
+	const missingReminderLabel = useMemo(
+		() => t('tasksListItem.reminder.doNotRemindMe', 'Do not remind me'),
+		[t]
+	);
 
-		const preventTextSelection = useCallback<React.MouseEventHandler<HTMLDivElement>>((e) => {
-			if (e.detail > 1) {
-				e.preventDefault();
-			}
-		}, []);
+	const preventTextSelection = useCallback<React.MouseEventHandler<HTMLDivElement>>((e) => {
+		if (e.detail > 1) {
+			e.preventDefault();
+		}
+	}, []);
 
-		return (
-			<Container data-testid={id} height={LIST_ITEM_HEIGHT}>
-				{visible && (
-					<ContextualMenu actions={actions}>
-						<ListItemContainer
-							height={'fit'}
-							crossAlignment={'flex-end'}
-							onMouseDown={preventTextSelection}
-							onClick={clickHandler}
-							data-testid={'list-item-content'}
+	return (
+		<Container data-testid={id} height={LIST_ITEM_HEIGHT}>
+			{visible && (
+				<ContextualMenu actions={actions}>
+					<ListItemContainer
+						height={'fit'}
+						crossAlignment={'flex-end'}
+						onMouseDown={preventTextSelection}
+						onClick={clickHandler}
+						data-testid={'list-item-content'}
+					>
+						<HoverContainer
+							height={LIST_ITEM_HEIGHT}
+							wrap="nowrap"
+							mainAlignment="flex-start"
+							crossAlignment="center"
+							padding={{ all: 'small' }}
+							width="fill"
+							gap={'1rem'}
 						>
-							<HoverContainer
-								height={LIST_ITEM_HEIGHT}
-								wrap="nowrap"
-								mainAlignment="flex-start"
-								crossAlignment="center"
-								padding={{ all: 'small' }}
+							<ContentContainer
+								orientation="vertical"
+								height={'auto'}
+								maxHeight={'100%'}
+								gap={'0.25rem'}
 								width="fill"
-								gap={'1rem'}
+								mainAlignment={'flex-start'}
 							>
-								<ContentContainer
-									orientation="vertical"
-									height={'auto'}
-									maxHeight={'100%'}
+								<Row gap={'0.25rem'} width="fill" wrap="nowrap">
+									{status === Status.Complete && (
+										<Container width={'fit'} height={'fit'} flexShrink={0}>
+											<Icon size={'large'} icon={'Checkmark'} color={'success'} />
+										</Container>
+									)}
+									<Text overflow="ellipsis" size="medium">
+										{title}
+									</Text>
+									<Container margin={{ left: 'auto' }} width={'fit'} height={'fit'} flexShrink={0}>
+										<PriorityIcon priority={priority} />
+									</Container>
+								</Row>
+								<Row
 									gap={'0.25rem'}
 									width="fill"
-									mainAlignment={'flex-start'}
+									wrap="nowrap"
+									mainAlignment="space-between"
+									crossAlignment={'flex-start'}
 								>
-									<Row gap={'0.25rem'} width="fill" wrap="nowrap">
-										{status === Status.Complete && (
-											<Container width={'fit'} height={'fit'} flexShrink={0}>
-												<Icon size={'large'} icon={'Checkmark'} color={'success'} />
-											</Container>
-										)}
-										<Text overflow="ellipsis" size="medium">
-											{title}
-										</Text>
-										<Container
-											margin={{ left: 'auto' }}
-											width={'fit'}
-											height={'fit'}
-											flexShrink={0}
-										>
-											<PriorityIcon priority={priority} />
-										</Container>
-									</Row>
-									<Row
-										gap={'0.25rem'}
-										width="fill"
-										wrap="nowrap"
-										mainAlignment="space-between"
+									<Container
+										flexShrink={1}
+										flexGrow={1}
+										flexBasis="auto"
+										mainAlignment="flex-start"
+										orientation="horizontal"
+										minWidth={0}
+										width="auto"
+										height={'auto'}
+										wrap={'wrap-reverse'}
 										crossAlignment={'flex-start'}
 									>
-										<Container
-											flexShrink={1}
-											flexGrow={1}
-											flexBasis="auto"
-											mainAlignment="flex-start"
-											orientation="horizontal"
-											minWidth={0}
-											width="auto"
-											height={'auto'}
-											wrap={'wrap-reverse'}
-											crossAlignment={'flex-start'}
-										>
-											{reminderAt ? (
-												<>
-													<Text size="small">
-														{t('tasksListItem.reminder.remindMeOn', 'Remind me on')}&nbsp;
-													</Text>
-													<Container width={'fit'} height={'fit'} flexShrink={0} maxWidth={'100%'}>
-														<Reminder reminderAt={reminderAt} reminderAllDay={reminderAllDay} />
-													</Container>
-												</>
-											) : (
-												<Text color="secondary" size="small">
-													{missingReminderLabel}
+										{reminderAt ? (
+											<>
+												<Text size="small">
+													{t('tasksListItem.reminder.remindMeOn', 'Remind me on')}&nbsp;
 												</Text>
-											)}
-										</Container>
-										{isReminderExpired && (
-											<ReminderIconContainer width={'fit'} flexShrink={0}>
-												<Icon icon="AlertTriangle" color="warning" />
-											</ReminderIconContainer>
+												<Container width={'fit'} height={'fit'} flexShrink={0} maxWidth={'100%'}>
+													<Reminder reminderAt={reminderAt} reminderAllDay={reminderAllDay} />
+												</Container>
+											</>
+										) : (
+											<Text color="secondary" size="small">
+												{missingReminderLabel}
+											</Text>
 										)}
-									</Row>
-								</ContentContainer>
-							</HoverContainer>
-							<ListItemHoverBar actions={actions} />
-						</ListItemContainer>
-					</ContextualMenu>
-				)}
-			</Container>
-		);
-	}
-);
-
-ListItemContent.displayName = 'ListItemContent';
+									</Container>
+									{isReminderExpired && (
+										<ReminderIconContainer width={'fit'} flexShrink={0}>
+											<Icon icon="AlertTriangle" color="warning" />
+										</ReminderIconContainer>
+									)}
+								</Row>
+							</ContentContainer>
+						</HoverContainer>
+						<ListItemHoverBar actions={actions} />
+					</ListItemContainer>
+				</ContextualMenu>
+			)}
+		</Container>
+	);
+});

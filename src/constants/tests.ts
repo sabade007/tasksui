@@ -27,8 +27,13 @@ export const TEST_ID_SELECTOR = {
 	hoverBar: 'hover-bar',
 	listItem: 'list-item',
 	listItemContent: 'list-item-content',
-	dropdown: 'dropdown-popper-list'
+	dropdown: 'dropdown-popper-list',
+	modal: 'modal'
 };
 
 export const EMPTY_DISPLAYER_HINT = 'Start organizing your day.';
 export const EMPTY_LIST_HINT = "It looks like there's nothing here.";
+
+export const TIMERS = {
+	modal: { delayOpen: 1 }
+};

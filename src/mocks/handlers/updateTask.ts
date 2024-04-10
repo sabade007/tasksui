@@ -4,23 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { type GraphQLResponseResolver, HttpResponse } from 'msw';
+
 import {
 	Priority,
 	Status,
 	type UpdateTaskMutation,
 	type UpdateTaskMutationVariables
 } from '../../gql/types';
-import { type GraphQLResponseResolver } from '../../types/commons';
 
 // returned response must be reImplemented to have consistent data
-const handler: GraphQLResponseResolver<UpdateTaskMutation, UpdateTaskMutationVariables> = (
-	req,
-	res,
-	context
-) => {
-	const { updateTask } = req.variables;
-	return res(
-		context.data({
+const handler: GraphQLResponseResolver<UpdateTaskMutation, UpdateTaskMutationVariables> = ({
+	variables
+}) => {
+	const { updateTask } = variables;
+	return HttpResponse.json({
+		data: {
 			updateTask: {
 				id: updateTask.id,
 				status: updateTask.status || Status.Open,
@@ -32,8 +31,8 @@ const handler: GraphQLResponseResolver<UpdateTaskMutation, UpdateTaskMutationVar
 				createdAt: 1,
 				__typename: 'Task'
 			}
-		})
-	);
+		}
+	});
 };
 
 export default handler;
