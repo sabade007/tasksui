@@ -10,9 +10,9 @@ import { faker } from '@faker-js/faker';
 import { act, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import * as carbonioShellUi from '@zextras/carbonio-shell-ui';
 import {
-	type AppSetters,
 	getNotificationManager,
-	type NotificationConfig
+	type NotificationConfig,
+	type updatePrimaryBadge
 } from '@zextras/carbonio-shell-ui';
 import {
 	addMinutes,
@@ -1048,8 +1048,8 @@ describe('Reminders manager', () => {
 			setup(<RemindersManager />, { mocks, initialRouterEntries: [`/differentModule`] });
 			await waitFor(() => expect(mockShowBadge).toHaveBeenCalled());
 			expect(mockShowBadge).toHaveBeenCalledTimes(1);
-			const args: Parameters<AppSetters['updatePrimaryBadge']> = [
-				expect.objectContaining<Parameters<AppSetters['updatePrimaryBadge']>[0]>({ show: true }),
+			const args: Parameters<typeof updatePrimaryBadge> = [
+				expect.objectContaining<Parameters<typeof updatePrimaryBadge>[0]>({ show: true }),
 				TASKS_ROUTE
 			];
 			expect(mockShowBadge).toHaveBeenCalledWith(...args);
@@ -1070,8 +1070,8 @@ describe('Reminders manager', () => {
 			});
 			await waitFor(() => expect(mockShowBadge).toHaveBeenCalled());
 			expect(mockShowBadge).toHaveBeenCalledTimes(1);
-			const args: Parameters<AppSetters['updatePrimaryBadge']> = [
-				expect.objectContaining<Parameters<AppSetters['updatePrimaryBadge']>[0]>({ show: true }),
+			const args: Parameters<typeof updatePrimaryBadge> = [
+				expect.objectContaining<Parameters<typeof updatePrimaryBadge>[0]>({ show: true }),
 				TASKS_ROUTE
 			];
 			expect(mockShowBadge).toHaveBeenCalledWith(...args);
@@ -1087,7 +1087,7 @@ describe('Reminders manager', () => {
 			const mocks = [mockFindTasks({ status: Status.Open }, tasks)];
 			setup(<RemindersManager />, { mocks, initialRouterEntries: [`/differentModule`] });
 			await waitFor(() => expect(mockShowBadge).toHaveBeenCalled());
-			const args1: Parameters<AppSetters['updatePrimaryBadge']> = [
+			const args1: Parameters<typeof updatePrimaryBadge> = [
 				{ show: true, count: 6, showCount: true },
 				TASKS_ROUTE
 			];
@@ -1097,7 +1097,7 @@ describe('Reminders manager', () => {
 				jest.runOnlyPendingTimers();
 			});
 			await waitFor(() => expect(mockShowBadge).toHaveBeenCalled());
-			const args2: Parameters<AppSetters['updatePrimaryBadge']> = [
+			const args2: Parameters<typeof updatePrimaryBadge> = [
 				{ show: true, count: 9, showCount: true },
 				TASKS_ROUTE
 			];
@@ -1122,7 +1122,7 @@ describe('Reminders manager', () => {
 			mockShowBadge.mockClear();
 			await user.click(screen.getByRole('link', { name: 'Go to Tasks' }));
 			await waitForModalToOpen();
-			const args: Parameters<AppSetters['updatePrimaryBadge']> = [{ show: false }, TASKS_ROUTE];
+			const args: Parameters<typeof updatePrimaryBadge> = [{ show: false }, TASKS_ROUTE];
 			expect(mockShowBadge).toHaveBeenCalled();
 			expect(mockShowBadge).toHaveBeenCalledWith(...args);
 		});
