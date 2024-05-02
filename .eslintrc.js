@@ -32,7 +32,8 @@ module.exports = {
 				'**/types/commons.ts',
 				'**/mocks/**/*',
 				'**/gql/types.ts',
-				'**/tests/**/*'
+				'**/tests/**/*',
+				'codegen.ts'
 			],
 			rules: {
 				'import/no-extraneous-dependencies': 'off'

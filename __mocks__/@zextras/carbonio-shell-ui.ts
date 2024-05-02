@@ -6,15 +6,7 @@
 
 import { useCallback } from 'react';
 
-import {
-	type BoardHooksContext,
-	type Account,
-	type AccountSettings,
-	type Board,
-	type HistoryParams,
-	type INotificationManager,
-	type AppSetters
-} from '@zextras/carbonio-shell-ui';
+import type * as shell from '@zextras/carbonio-shell-ui';
 import { type TOptions } from 'i18next';
 import { noop, trimStart } from 'lodash';
 import { useHistory } from 'react-router-dom';
@@ -25,11 +17,11 @@ function parsePath(path: string): string {
 	return `/${trimStart(path, '/')}`;
 }
 
-function useReplaceHistoryMock(): (params: HistoryParams) => void {
+function useReplaceHistoryMock(): (params: shell.HistoryParams) => void {
 	const history = useHistory();
 
 	return useCallback(
-		(location: string | HistoryParams) => {
+		(location: string | shell.HistoryParams) => {
 			if (typeof location === 'string') {
 				history.replace(parsePath(location));
 			} else if (typeof location.path === 'string') {
@@ -42,11 +34,11 @@ function useReplaceHistoryMock(): (params: HistoryParams) => void {
 	);
 }
 
-function usePushHistoryMock(): (params: HistoryParams) => void {
+function usePushHistoryMock(): (params: shell.HistoryParams) => void {
 	const history = useHistory();
 
 	return useCallback(
-		(location: string | HistoryParams) => {
+		(location: string | shell.HistoryParams) => {
 			if (typeof location === 'string') {
 				history.push(parsePath(location));
 			} else if (typeof location.path === 'string') {
@@ -59,15 +51,15 @@ function usePushHistoryMock(): (params: HistoryParams) => void {
 	);
 }
 
-export const useUserAccounts = (): Account[] => [LOGGED_USER];
-export const useUserSettings = (): AccountSettings => USER_SETTINGS;
+export const useUserAccounts = (): shell.Account[] => [LOGGED_USER];
+export const useUserSettings = (): shell.AccountSettings => USER_SETTINGS;
 export const useReplaceHistoryCallback = useReplaceHistoryMock;
 export const usePushHistoryCallback = usePushHistoryMock;
 export const ACTION_TYPES = {
 	NEW: 'new'
 };
 
-export const useBoardHooks = (): BoardHooksContext => ({
+export const useBoardHooks = (): shell.BoardHooksContext => ({
 	closeBoard: noop,
 	updateBoard: noop,
 	setCurrentBoard: noop,
@@ -75,14 +67,14 @@ export const useBoardHooks = (): BoardHooksContext => ({
 		// implement the mock when required, for now leave it unimplemented
 		throw new Error('not implemented');
 	},
-	getBoard: <T>(): Board<T> => {
+	getBoard: <T>(): shell.Board<T> => {
 		// implement the mock when required, for now leave it unimplemented
 		throw new Error('not implemented');
 	}
 });
 
 // eslint-disable-next-line arrow-body-style
-export const useBoard: <T>() => Board<T> = () => {
+export const useBoard: <T>() => shell.Board<T> = () => {
 	return {
 		id: '',
 		title: '',
@@ -99,12 +91,12 @@ export const t = (key: string, defaultValue?: string | TOptions): string => {
 	return defaultValue?.defaultValue || key;
 };
 
-const notificationManagerInstance: INotificationManager = {
+const notificationManagerInstance: shell.INotificationManager = {
 	notify: noop,
 	playSound: noop,
 	showPopup: noop,
 	multipleNotify: noop
 };
-export const getNotificationManager = (): INotificationManager => notificationManagerInstance;
+export const getNotificationManager = (): shell.INotificationManager => notificationManagerInstance;
 
-export const updatePrimaryBadge: AppSetters['updatePrimaryBadge'] = noop;
+export const updatePrimaryBadge: typeof shell.updatePrimaryBadge = noop;
