@@ -12,7 +12,13 @@ import {
 	useSnackbar,
 	Text
 } from '@zextras/carbonio-design-system';
-import { addBoard, getBoardById, reopenBoards, setCurrentBoard } from '@zextras/carbonio-shell-ui';
+import {
+	addBoard,
+	closeBoard,
+	getBoardById,
+	reopenBoards,
+	setCurrentBoard
+} from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import { useCompleteAction } from './useCompleteAction';
@@ -43,6 +49,11 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 			confirmColor: 'error',
 			onConfirm: () => {
 				trashAction().then(() => {
+					const boardId = `edit-task-${task.id}`;
+					const board = getBoardById(boardId);
+					if (board) {
+						closeBoard(boardId);
+					}
 					closeModal();
 					createSnackbar({
 						type: 'success',
@@ -67,7 +78,7 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 				</Container>
 			)
 		});
-	}, [createModal, createSnackbar, t, trashAction]);
+	}, [createModal, createSnackbar, t, task.id, trashAction]);
 
 	const reopenActionHandler = useCallback(() => {
 		reopenAction().then(() => {

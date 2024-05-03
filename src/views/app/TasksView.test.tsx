@@ -7,6 +7,7 @@ import React from 'react';
 
 import { faker } from '@faker-js/faker';
 import { act, screen, waitFor, within } from '@testing-library/react';
+import * as shell from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 import { Route } from 'react-router-dom';
 
@@ -478,6 +479,72 @@ describe('Task view', () => {
 			const confirmButton = await screen.findByRole('button', { name: /^delete permanently/i });
 			await user.click(confirmButton);
 			expect(screen.getByText('Task permanently deleted')).toBeVisible();
+		});
+
+		test('Close edit board if open when task is deleted', async () => {
+			const tasks = populateTaskList();
+			const task = tasks[0];
+
+			jest.spyOn(shell, 'getBoardById').mockReturnValue({
+				id: `edit-task-${task.id}`,
+				url: '',
+				app: '',
+				icon: '',
+				title: ''
+			});
+			const closeBoardSpy = jest.spyOn(shell, 'closeBoard');
+
+			const findTasksMock = mockFindTasks({}, tasks);
+			const mocks = [findTasksMock, mockTrashTask({ taskId: task.id })];
+
+			const { user } = setup(
+				<Route path={ROUTES.task}>
+					<TasksView />
+				</Route>,
+				{
+					mocks
+				}
+			);
+			await waitFor(() => expect(findTasksMock.result).toHaveBeenCalled());
+			makeListItemsVisible();
+			await screen.findByText(task.title);
+
+			const action = within(screen.getByTestId(task.id)).getByTestId(ICON_REGEXP.deleteAction);
+			await user.click(action);
+			const confirmButton = await screen.findByRole('button', { name: /^delete permanently/i });
+			await user.click(confirmButton);
+			expect(screen.getByText('Task permanently deleted')).toBeVisible();
+			expect(closeBoardSpy).toHaveBeenCalledWith(`edit-task-${task.id}`);
+		});
+
+		test('Should not close edit board if not open when task is deleted', async () => {
+			const tasks = populateTaskList();
+			const task = tasks[0];
+
+			jest.spyOn(shell, 'getBoardById').mockReturnValue(undefined);
+			const closeBoardSpy = jest.spyOn(shell, 'closeBoard');
+
+			const findTasksMock = mockFindTasks({}, tasks);
+			const mocks = [findTasksMock, mockTrashTask({ taskId: task.id })];
+
+			const { user } = setup(
+				<Route path={ROUTES.task}>
+					<TasksView />
+				</Route>,
+				{
+					mocks
+				}
+			);
+			await waitFor(() => expect(findTasksMock.result).toHaveBeenCalled());
+			makeListItemsVisible();
+			await screen.findByText(task.title);
+
+			const action = within(screen.getByTestId(task.id)).getByTestId(ICON_REGEXP.deleteAction);
+			await user.click(action);
+			const confirmButton = await screen.findByRole('button', { name: /^delete permanently/i });
+			await user.click(confirmButton);
+			expect(screen.getByText('Task permanently deleted')).toBeVisible();
+			expect(closeBoardSpy).not.toHaveBeenCalled();
 		});
 	});
 });
