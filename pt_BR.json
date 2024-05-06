@@ -77,7 +77,8 @@
             "button": {
                 "confirm": "Excluir permanentemente"
             },
-            "header": "Esta ação é irreversível"
+            "header": "Esta ação é irreversível",
+            "body": "Você vai excluir permanentemente esta tarefa. Você não poderá mais recuperar essa tarefa. Essa ação é irreversível."
         }
     },
     "task": {
@@ -91,7 +92,8 @@
         "edit": "Editar",
         "undo": "Desfazer",
         "complete": "Completar",
-        "delete": "Excluir"
+        "delete": "Excluir",
+        "uncomplete": "Incompleto"
     },
     "displayer": {
         "details": {
@@ -115,15 +117,15 @@
         ],
         "allTasks_limitReached": [
             {
-                "message": "Para criar uma nova, complete algumas tarefas existentes.",
+                "message": "Exclua suas tarefas anteriores para criar outras.",
                 "title": "Você atingiu o número máximo de tarefas."
             }
         ]
     },
     "newTaskBoard": {
         "banner": {
-            "limitReached": "Você atingiu as 200 tarefas. Para criar mais, complete as tarefas anteriores.",
-            "lastTask": "Essa é a última tarefa que você pode criar. Para criar mais, complete as tarefas anteriores."
+            "limitReached": "Você atingiu suas 200 tarefas. Exclua as tarefas anteriores para criar outras.",
+            "lastTask": "Essa é a última tarefa que você pode criar. Exclua suas tarefas anteriores para criar outras."
         }
     },
     "secondaryBar": {
@@ -132,7 +134,9 @@
     "snackbar": {
         "completeTask": "Tarefa \"{{taskTitle}}\" completada",
         "restoreTask": "Tarefa restaurada na pasta \"Todas as tarefas\"",
-        "tasksLimitReached": "Você atingiu as 200 tarefas. Para criar mais, complete as tarefas anteriores."
+        "tasksLimitReached": "Você atingiu suas 200 tarefas. Exclua as tarefas anteriores para criar outras.",
+        "permanentlyDeletedTask": "Tarefa permanentemente excluída",
+        "uncompleteTask": "Tarefa \"{{taskTitle}}\" incompleta"
     },
     "tasksListItem": {
         "reminder": {
