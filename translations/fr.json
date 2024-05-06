@@ -10,7 +10,7 @@
             }
         },
         "confirmButton": {
-            "edit": "édition",
+            "edit": "modifier",
             "create": "créer"
         },
         "dateTimePicker": {

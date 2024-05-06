@@ -9,7 +9,7 @@
             "dismiss": "Zamknij",
             "completeAll": "Ukończ wszystkie",
             "title": "Przypomnienia o zadaniach",
-            "remindMeOn": "Przypomnij mi o",
+            "remindMeOn": "Przypomnij mi",
             "undoAll": "Cofnij wszystko"
         },
         "delete": {
@@ -134,7 +134,7 @@
     },
     "tasksListItem": {
         "reminder": {
-            "remindMeOn": "Przypomnij mi o",
+            "remindMeOn": "Przypomnij mi",
             "doNotRemindMe": "Nie przypominaj"
         }
     },

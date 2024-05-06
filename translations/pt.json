@@ -3,7 +3,8 @@
         "edit": "Editar",
         "undo": "Desfazer",
         "complete": "Completar",
-        "delete": "Apagar"
+        "delete": "Excluir",
+        "uncomplete": "Incompleto"
     },
     "board": {
         "confirmButton": {
@@ -95,7 +96,7 @@
         ],
         "allTasks_limitReached": [
             {
-                "message": "Para criar uma nova, complete algumas das tarefas existentes.",
+                "message": "Exclua suas tarefas anteriores para criar outras.",
                 "title": "Atingiu o número máximo de tarefas."
             }
         ]
@@ -117,13 +118,14 @@
             "button": {
                 "confirm": "Apagar permanentemente"
             },
-            "header": "Esta ação é irreversível"
+            "header": "Esta ação é irreversível",
+            "body": "Você vai excluir permanentemente esta tarefa. Você não poderá mais recuperar essa tarefa. Essa ação é irreversível."
         }
     },
     "newTaskBoard": {
         "banner": {
-            "limitReached": "Atingiu as 200 tarefas. Para criar mais, complete as tarefas anteriores.",
-            "lastTask": "Esta é a última tarefa que pode criar. Para criar mais, complete as tarefas anteriores."
+            "limitReached": "Você atingiu suas 200 tarefas. Exclua suas tarefas anteriores para criar outras.",
+            "lastTask": "Esta é a última tarefa que você pode criar. Exclua suas tarefas anteriores para criar outras."
         }
     },
     "secondaryBar": {
@@ -132,7 +134,9 @@
     "snackbar": {
         "completeTask": "A Tarefa \"{{taskTitle}}\" foi concluida",
         "restoreTask": "Tarefa recuperada na pasta \"Todas as tarefas\"",
-        "tasksLimitReached": "Atingiu as 200 Tarefas. Para criar mais, complete as Tarefas anteriores."
+        "tasksLimitReached": "Você atingiu suas 200 tarefas. Exclua suas tarefas anteriores para criar outras.",
+        "permanentlyDeletedTask": "Tarefa excluída permanentemente",
+        "uncompleteTask": "Tarefa \"{{taskTitle}}\" incompleta"
     },
     "tasksListItem": {
         "reminder": {
