@@ -14,8 +14,6 @@
 		"type-check:watch": "npm run type-check -- --watch",
 		"codegen": "NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts",
 		"codegen:watch": "NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts --watch",
-		"translations:push": "git subtree push --prefix translations $npm_package_config_translations_repository translations-updater/$(date '+%Y-%m-%d')",
-		"translations:pull": "git subtree pull --squash --prefix translations $npm_package_config_translations_repository master",
 		"build:dev": "sdk build --dev --pkgRel $(date +%s)"
 	},
 	"keywords": [],
@@ -50,8 +48,7 @@
 		"@types/styled-components": "^5.1.34",
 		"@types/uuid": "^9.0.8",
 		"@zextras/carbonio-ui-configs": "^1.0.0",
-		"@zextras/carbonio-ui-sdk": "^1.7.1",
-		"babel-plugin-i18next-extract": "^0.10.0",
+		"@zextras/carbonio-ui-sdk": "^1.7.2",
 		"babel-plugin-styled-components": "^2.1.4",
 		"dotenv": "^16.4.5",
 		"eslint-plugin-notice": "^0.9.10",

@@ -134,7 +134,7 @@ const getAppI18n = (): i18n => {
 			lng: 'en',
 			fallbackLng: 'en',
 			debug: false,
-
+			compatibilityJSON: 'v4',
 			interpolation: {
 				escapeValue: false // not needed for react as it escapes by default
 			},
