@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -55,16 +55,9 @@ export type MutationUpdateTaskArgs = {
 
 export type NewTaskInput = {
 	description?: InputMaybe<Scalars['String']['input']>;
-	/**  If not set then the default is NORMAL */
 	priority?: InputMaybe<Priority>;
-	/**  If set but the reminderAt is not set the creation fails */
 	reminderAllDay?: InputMaybe<Scalars['Boolean']['input']>;
-	/**
-	 *  If not set then the task does not have a reminder and
-	 *  the reminderAllDay attribute must not be set
-	 */
 	reminderAt?: InputMaybe<Scalars['DateTime']['input']>;
-	/**  If not set then the default is OPEN */
 	status?: InputMaybe<Status>;
 	title: Scalars['String']['input'];
 };
@@ -106,34 +99,21 @@ export enum Status {
 export type Task = {
 	__typename?: 'Task';
 	createdAt: Scalars['DateTime']['output'];
-	/**  The description has a limit of 4096 characters */
 	description?: Maybe<Scalars['String']['output']>;
 	id: Scalars['ID']['output'];
 	priority: Priority;
-	/**
-	 *  When this boolean is set then the reminder will be for all day
-	 *  If not set the default is false
-	 */
 	reminderAllDay?: Maybe<Scalars['Boolean']['output']>;
 	reminderAt?: Maybe<Scalars['DateTime']['output']>;
 	status: Status;
-	/**  The title has a limit of 1024 characters and cannot have a string with only spaces */
 	title: Scalars['String']['output'];
 };
 
 export type UpdateTaskInput = {
 	description?: InputMaybe<Scalars['String']['input']>;
 	id: Scalars['ID']['input'];
-	/**  If not set then the default is NORMAL */
 	priority?: InputMaybe<Priority>;
-	/**  If set but the reminderAt is not set the creation fails */
 	reminderAllDay?: InputMaybe<Scalars['Boolean']['input']>;
-	/**
-	 *  If not set then the task does not have a reminder and
-	 *  the reminderAllDay attribute must not be set
-	 */
 	reminderAt?: InputMaybe<Scalars['DateTime']['input']>;
-	/**  If not set then the default is OPEN */
 	status?: InputMaybe<Status>;
 	title?: InputMaybe<Scalars['String']['input']>;
 };
