@@ -6,13 +6,12 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { useMutation, useQuery } from '@apollo/client';
-import { useSnackbar } from '@zextras/carbonio-design-system';
+import { Banner, useSnackbar } from '@zextras/carbonio-design-system';
 import { t, useBoardHooks } from '@zextras/carbonio-shell-ui';
 import { filter, trim } from 'lodash';
 
 import { CommonTaskBoard, type CommonTaskBoardProps } from './CommonTaskBoard';
 import { addTaskToList } from '../../apollo/cacheUtils';
-import { NewTaskLimitBanner } from '../../components/NewTaskLimitBanner';
 import { MAX_TASKS_LIMIT } from '../../constants';
 import {
 	CreateTaskDocument,
@@ -95,23 +94,23 @@ const NewTaskBoard = (): React.JSX.Element => {
 			confirmLabel={t('board.confirmButton.create', 'create')}
 			banner={
 				(tasks.length === MAX_TASKS_LIMIT - 1 && (
-					<NewTaskLimitBanner
-						bannerLabel={t(
+					<Banner
+						description={t(
 							'newTaskBoard.banner.lastTask',
 							'This is the last task you can create. Delete your previous tasks to create more.'
 						)}
-						bannerIcon={'InfoOutline'}
-						bannerColor={'info'}
+						severity={'info'}
+						type={'outline'}
 					/>
 				)) ||
 				(tasks.length >= MAX_TASKS_LIMIT && (
-					<NewTaskLimitBanner
-						bannerLabel={t(
+					<Banner
+						description={t(
 							'newTaskBoard.banner.limitReached',
 							'You have reached your 200 tasks. Delete your previous tasks to create more.'
 						)}
-						bannerIcon={'AlertTriangleOutline'}
-						bannerColor={'warning'}
+						severity={'warning'}
+						type={'outline'}
 					/>
 				)) ||
 				undefined
