@@ -5,7 +5,7 @@
  */
 import { useMemo } from 'react';
 
-import moment from 'moment';
+import { useTranslation } from 'react-i18next';
 
 import { formatDateFromTimestamp } from '../utils';
 
@@ -18,14 +18,22 @@ export const useReminder = (
 	reminderAt: number | null | undefined,
 	reminderAllDay: boolean | null | undefined
 ): UseReminderReturnType => {
+	const {
+		i18n: { language }
+	} = useTranslation();
+
 	const isExpired = useMemo(() => {
 		if (reminderAt) {
-			const now = moment();
+			const now = Date.now();
 			if (reminderAllDay) {
-				return moment(reminderAt).isBefore(now, 'day');
+				const reminderAtMidnight = new Date(reminderAt);
+				reminderAtMidnight.setHours(0, 0, 0, 0);
+				const nowAtMidnight = new Date(now);
+				nowAtMidnight.setHours(0, 0, 0, 0);
+				return reminderAtMidnight.getTime() - nowAtMidnight.getTime() < 0;
 			}
 
-			return moment(reminderAt).isBefore(now);
+			return reminderAt - now < 0;
 		}
 		return false;
 	}, [reminderAllDay, reminderAt]);
@@ -33,11 +41,12 @@ export const useReminder = (
 	const formattedDate = useMemo(() => {
 		if (reminderAt) {
 			return formatDateFromTimestamp(reminderAt, {
-				includeTime: reminderAllDay !== true
+				includeTime: reminderAllDay !== true,
+				locale: language
 			});
 		}
 		return '';
-	}, [reminderAllDay, reminderAt]);
+	}, [language, reminderAllDay, reminderAt]);
 
 	return { isExpired, formattedDate };
 };

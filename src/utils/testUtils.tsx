@@ -21,6 +21,7 @@ import {
 	screen,
 	within
 } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { ModalManager, SnackbarManager } from '@zextras/carbonio-design-system';
 import i18next, { type i18n } from 'i18next';
@@ -125,7 +126,7 @@ const customQueries = {
 	findByRoleWithIcon
 };
 
-const getAppI18n = (): i18n => {
+export const getAppI18n = (): i18n => {
 	const newI18n = i18next.createInstance();
 	newI18n
 		// init i18next
@@ -165,11 +166,13 @@ const ApolloProviderWrapper = ({
 	);
 
 export const I18NextTestProvider = ({
+	i18n,
 	children
 }: {
+	i18n?: typeof i18next;
 	children: React.ReactNode;
 }): React.JSX.Element => {
-	const i18nInstance = useMemo(() => getAppI18n(), []);
+	const i18nInstance = useMemo(() => i18n ?? getAppI18n(), [i18n]);
 
 	return <I18nextProvider i18n={i18nInstance}>{children}</I18nextProvider>;
 };
@@ -239,6 +242,17 @@ export const setup = (
 		...options?.renderOptions
 	})
 });
+
+export const setupHook = <TProps, TResult>(
+	callback: Parameters<typeof renderHook<TProps, TResult>>[0],
+	options?: Parameters<typeof renderHook<TProps, TResult>>[1] & { i18n?: i18n }
+): ReturnType<typeof renderHook<TProps, TResult>> =>
+	renderHook<TProps, TResult>(callback, {
+		wrapper: ({ children }) => (
+			<I18NextTestProvider i18n={options?.i18n}>{children}</I18NextTestProvider>
+		),
+		...options
+	});
 
 export function makeListItemsVisible(): void {
 	const { calls, instances } = (
