@@ -267,6 +267,7 @@ export const CommonTaskBoard = ({
 			crossAlignment={'flex-end'}
 			background={'gray5'}
 			padding={{ horizontal: 'large', bottom: '2.625rem' }}
+			minHeight={'30rem'}
 		>
 			<Padding vertical={'small'}>
 				<Button

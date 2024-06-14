@@ -62,12 +62,12 @@ export const TaskDetails = ({
 	reminderAllDay,
 	description
 }: TaskDetailsProps): React.JSX.Element => {
-	const [t] = useTranslation();
+	const [t, { language }] = useTranslation();
 	const { isExpired } = useReminder(reminderAt, reminderAllDay);
 
 	const creationDate = useMemo(
-		() => formatDateFromTimestamp(createdAt, { includeTime: false }),
-		[createdAt]
+		() => formatDateFromTimestamp(createdAt, { includeTime: false, locale: language }),
+		[createdAt, language]
 	);
 
 	return (

@@ -161,7 +161,7 @@ describe('List item content', () => {
 					status={Status.Open}
 				/>
 			);
-			const reminderDate = await screen.findByText('Aug 08, 1988 - 09:15');
+			const reminderDate = await screen.findByText('Aug 08, 1988, 09:15 AM');
 
 			expect(reminderDate).toBeInTheDocument();
 			expect(reminderDate).toBeVisible();

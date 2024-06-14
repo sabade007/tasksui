@@ -12,9 +12,6 @@ type Config {
 	value: String!
 }
 
-"""
-A custom scalar representing a date in a timestamp format
-"""
 scalar DateTime
 
 type Mutation {
@@ -25,23 +22,9 @@ type Mutation {
 
 input NewTaskInput {
 	description: String
-
-	"""
-	If not set then the default is NORMAL
-	"""
 	priority: Priority
-
-	"""
-	If set but the reminderAt is not set the creation fails
-	"""
 	reminderAllDay: Boolean
-
-	" If not set then the task does not have a reminder and\n the reminderAllDay attribute must not be set"
 	reminderAt: DateTime
-
-	"""
-	If not set then the default is OPEN
-	"""
 	status: Status
 	title: String!
 }
@@ -71,45 +54,21 @@ enum Status {
 
 type Task {
 	createdAt: DateTime!
-
-	"""
-	The description has a limit of 4096 characters
-	"""
 	description: String
 	id: ID!
 	priority: Priority!
-
-	" When this boolean is set then the reminder will be for all day\n If not set the default is false"
 	reminderAllDay: Boolean
 	reminderAt: DateTime
 	status: Status!
-
-	"""
-	The title has a limit of 1024 characters and cannot have a string with only spaces
-	"""
 	title: String!
 }
 
 input UpdateTaskInput {
 	description: String
 	id: ID!
-
-	"""
-	If not set then the default is NORMAL
-	"""
 	priority: Priority
-
-	"""
-	If set but the reminderAt is not set the creation fails
-	"""
 	reminderAllDay: Boolean
-
-	" If not set then the task does not have a reminder and\n the reminderAllDay attribute must not be set"
 	reminderAt: DateTime
-
-	"""
-	If not set then the default is OPEN
-	"""
 	status: Status
 	title: String
 }

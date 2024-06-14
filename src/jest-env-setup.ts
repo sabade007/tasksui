@@ -106,6 +106,17 @@ beforeAll(() => {
 			outerHeight: height
 		}).dispatchEvent(new this.Event('resize'));
 	};
+
+	Object.defineProperty(window, 'ResizeObserver', {
+		writable: true,
+		value: function ResizeObserverMock(): ResizeObserver {
+			return {
+				observe: noop,
+				unobserve: noop,
+				disconnect: noop
+			};
+		}
+	});
 });
 
 afterAll(() => server.close());

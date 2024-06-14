@@ -7,10 +7,8 @@ import React from 'react';
 
 import { faker } from '@faker-js/faker';
 import { screen } from '@testing-library/react';
-import moment from 'moment';
 
 import { TaskDetails } from './TaskDetails';
-import { DATE_FORMAT, DATE_TIME_FORMAT } from '../constants';
 import { ICON_REGEXP } from '../constants/tests';
 import { Priority } from '../gql/types';
 import { populateTask } from '../mocks/utils';
@@ -18,13 +16,12 @@ import { setup } from '../utils/testUtils';
 
 describe('Task details', () => {
 	test('Show creation date without time', () => {
-		const task = populateTask();
+		const task = populateTask({
+			createdAt: new Date(2024, 4, 7, 15, 25, 10, 0).getTime()
+		});
 		setup(<TaskDetails createdAt={task.createdAt} priority={task.priority} />);
 		expect(screen.getByText(/creation date/i)).toBeVisible();
-		expect(screen.getByText(moment(task.createdAt).format(DATE_FORMAT))).toBeVisible();
-		expect(
-			screen.queryByText(moment(task.createdAt).format(DATE_TIME_FORMAT))
-		).not.toBeInTheDocument();
+		expect(screen.getByText('May 07, 2024')).toBeVisible();
 	});
 
 	test('Show priority', () => {
@@ -33,14 +30,15 @@ describe('Task details', () => {
 		setup(<TaskDetails createdAt={task.createdAt} priority={task.priority} />);
 		expect(screen.getByText(/priority/i)).toBeVisible();
 		expect(screen.getByText(/medium/i)).toBeVisible();
-		expect(screen.getByTestId(ICON_REGEXP.mediumPriority));
+		expect(screen.getByTestId(ICON_REGEXP.mediumPriority)).toBeVisible();
 	});
 
 	describe('Reminder', () => {
 		test('Show date only if set for all day', () => {
-			const task = populateTask();
-			task.reminderAllDay = true;
-			task.reminderAt = faker.date.anytime().getTime();
+			const task = populateTask({
+				reminderAt: new Date(2025, 0, 1, 0, 1, 0, 0).getTime(),
+				reminderAllDay: true
+			});
 			setup(
 				<TaskDetails
 					createdAt={task.createdAt}
@@ -50,16 +48,13 @@ describe('Task details', () => {
 				/>
 			);
 			expect(screen.getByText(/reminder/i)).toBeVisible();
-			expect(screen.getByText(moment(task.reminderAt).format(DATE_FORMAT))).toBeVisible();
-			expect(
-				screen.queryByText(moment(task.reminderAt).format(DATE_TIME_FORMAT))
-			).not.toBeInTheDocument();
+			expect(screen.getByText('Jan 01, 2025')).toBeVisible();
 		});
 
 		test('Show time if not set for all day', () => {
 			const task = populateTask();
 			task.reminderAllDay = false;
-			task.reminderAt = faker.date.anytime().getTime();
+			task.reminderAt = new Date(2024, 8, 15, 10, 14, 58, 0).getTime();
 			setup(
 				<TaskDetails
 					createdAt={task.createdAt}
@@ -69,12 +64,13 @@ describe('Task details', () => {
 				/>
 			);
 			expect(screen.getByText(/reminder/i)).toBeVisible();
-			expect(screen.getByText(moment(task.reminderAt).format(DATE_TIME_FORMAT))).toBeVisible();
+			expect(screen.getByText('Sep 15, 2024, 10:14 AM')).toBeVisible();
 		});
 
 		test('Hide field if not set', () => {
-			const task = populateTask();
-			task.reminderAt = null;
+			const task = populateTask({
+				reminderAt: null
+			});
 			setup(
 				<TaskDetails
 					createdAt={task.createdAt}
@@ -84,14 +80,14 @@ describe('Task details', () => {
 				/>
 			);
 			expect(screen.queryByText(/reminder/i)).not.toBeInTheDocument();
-			expect(
-				screen.queryByText(moment(task.reminderAt).format(DATE_FORMAT))
-			).not.toBeInTheDocument();
 		});
 
 		test('Show expired icon if expired', () => {
-			const task = populateTask();
-			task.reminderAt = faker.date.past().getTime();
+			const task = populateTask({
+				reminderAt: new Date(2023, 11, 25, 12, 25, 0, 0).getTime(),
+				reminderAllDay: false
+			});
+			jest.setSystemTime(new Date(2024, 5, 4, 18, 14, 57, 0));
 			setup(
 				<TaskDetails
 					createdAt={task.createdAt}
@@ -101,11 +97,7 @@ describe('Task details', () => {
 				/>
 			);
 			expect(screen.getByText(/reminder/i)).toBeVisible();
-			expect(
-				screen.getByText(moment(task.reminderAt).format(DATE_FORMAT), {
-					exact: false
-				})
-			).toBeVisible();
+			expect(screen.getByText('Dec 25, 2023, 12:25 PM')).toBeVisible();
 			expect(screen.getByTestId(ICON_REGEXP.reminderExpired)).toBeVisible();
 		});
 	});

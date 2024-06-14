@@ -8,18 +8,16 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 import type { TypeScriptTypedDocumentNodesConfig } from '@graphql-codegen/typed-document-node';
 import type { TypeScriptPluginConfig } from '@graphql-codegen/typescript';
 import type { TypeScriptDocumentsPluginConfig } from '@graphql-codegen/typescript-operations';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 const config: CodegenConfig = {
 	overwrite: true,
 	schema: {
-		[`${process.env.SCHEMA_HOST}`]: {
-			headers: {
-				Cookie: `ZM_AUTH_TOKEN=${process.env.ZM_AUTH_TOKEN}`
+		'https://raw.githubusercontent.com/zextras/carbonio-tasks-ce/develop/core/src/main/resources/api/schema.graphql':
+			{
+				headers: {
+					Cookie: ''
+				}
 			}
-		}
 	},
 	generates: {
 		'src/gql/schema.graphql': {

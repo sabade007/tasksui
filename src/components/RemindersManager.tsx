@@ -58,13 +58,14 @@ type ReminderEntity = TaskWithReminder & {
 	isFutureReminder(): boolean;
 };
 
-function buildReminderEntity(task: TaskWithReminder): ReminderEntity {
+function buildReminderEntity(task: TaskWithReminder, locale: string): ReminderEntity {
 	return {
 		...task,
 		_reminderTimeout: false,
 		getKey(): string {
 			return formatDateFromTimestamp(task.reminderAt, {
-				includeTime: task.reminderAllDay !== true
+				includeTime: task.reminderAllDay !== true,
+				locale
 			});
 		},
 		isVisible(): boolean {
@@ -116,7 +117,7 @@ function isTaskWithReminder(task: Partial<Task> | null | undefined): task is Tas
 }
 
 export const RemindersManager = (): React.JSX.Element => {
-	const [t] = useTranslation();
+	const [t, { language }] = useTranslation();
 	const notificationManager = getNotificationManager();
 
 	// query used to register new task when the list changes
@@ -380,14 +381,14 @@ export const RemindersManager = (): React.JSX.Element => {
 		(tasks: Array<Partial<Task> | null>) => {
 			forEach(tasks, (task) => {
 				if (isTaskWithReminder(task)) {
-					const reminder = buildReminderEntity(task);
+					const reminder = buildReminderEntity(task, language);
 					if (reminder.isValid()) {
 						registerReminder(reminder);
 					}
 				}
 			});
 		},
-		[registerReminder]
+		[language, registerReminder]
 	);
 
 	useEffect(() => {
@@ -450,7 +451,7 @@ export const RemindersManager = (): React.JSX.Element => {
 		);
 		removedTasks.forEach((task) => {
 			if (isTaskWithReminder(task)) {
-				const reminder = buildReminderEntity(task);
+				const reminder = buildReminderEntity(task, language);
 				unregisterReminder(reminder);
 			}
 		});
@@ -463,6 +464,7 @@ export const RemindersManager = (): React.JSX.Element => {
 		checkForFutureRemindersToStart();
 	}, [
 		checkForFutureRemindersToStart,
+		language,
 		registerRemindersFromTasks,
 		remindersData?.findTasks,
 		remindersPreviousData?.findTasks,
@@ -484,7 +486,7 @@ export const RemindersManager = (): React.JSX.Element => {
 		);
 		const updatedReminders = modifiedTasks.reduce<ReminderEntity[]>((accumulator, task) => {
 			if (isTaskWithReminder(task)) {
-				const reminder = buildReminderEntity(task);
+				const reminder = buildReminderEntity(task, language);
 				updateRegisteredReminder(reminder);
 				accumulator.push(reminder);
 			}
@@ -497,6 +499,7 @@ export const RemindersManager = (): React.JSX.Element => {
 	}, [
 		checkForFutureRemindersToStart,
 		isModalOpen,
+		language,
 		remindersData?.findTasks,
 		remindersPreviousData?.findTasks,
 		showReminderDebounced,

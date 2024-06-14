@@ -8,11 +8,7 @@ import React from 'react';
 
 import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
-import { subMonths } from 'date-fns';
-import addMonths from 'date-fns/addMonths';
-import format from 'date-fns/format';
-import getDate from 'date-fns/getDate';
-import subDays from 'date-fns/subDays';
+import { subMonths, addMonths, format, getDate, subDays } from 'date-fns';
 
 import NewTaskBoard from './NewTaskBoard';
 import {
