@@ -25,7 +25,7 @@ function buildCollapsedItem(item: AccordionItemType): React.JSX.Element[] {
 				icon={item.icon || ''}
 				onClick={item.onClick || noop}
 				backgroundColor={(item.active && 'highlight') || undefined}
-				iconColor={item.iconCustomColor || item.iconColor}
+				iconColor={item.iconColor}
 			/>
 		</Tooltip>
 	);
