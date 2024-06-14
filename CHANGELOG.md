@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.12](https://github.com/zextras/carbonio-tasks-ui/compare/v0.0.11...v0.0.12) (2024-06-14)
+
+
+### Bug Fixes
+
+* avoid board hidden overflow ([04fd895](https://github.com/zextras/carbonio-tasks-ui/commit/04fd895d648c6ecb93ccf47a14d869d515f5257a)), closes [#117](https://github.com/zextras/carbonio-tasks-ui/issues/117)
+* close edit board when delete the task ([590e4cc](https://github.com/zextras/carbonio-tasks-ui/commit/590e4ccec59e9332107334830aaec700a68796c5)), closes [#100](https://github.com/zextras/carbonio-tasks-ui/issues/100)
+* remove moment and localize dates ([f8c9910](https://github.com/zextras/carbonio-tasks-ui/commit/f8c991096d43acb8ca8dd7a83e75c1dfef5a4544)), closes [#115](https://github.com/zextras/carbonio-tasks-ui/issues/115)
+* **types:** update shell types and extend ts check on entire project ([49fd91c](https://github.com/zextras/carbonio-tasks-ui/commit/49fd91c799f47bc51eea0a13a7b1b66e54960a22)), closes [#106](https://github.com/zextras/carbonio-tasks-ui/issues/106)
+
 ### [0.0.11](https://github.com/zextras/carbonio-tasks-ui/compare/v0.0.10...v0.0.11) (2024-05-06)
 
 ### [0.0.10](https://github.com/zextras/carbonio-tasks-ui/compare/v0.0.9...v0.0.10) (2024-04-10)
