@@ -40,7 +40,7 @@ describe('Edit task board', () => {
 		jest.spyOn(shell, 'useBoard').mockReturnValue({
 			context: { taskId },
 			id: '',
-			url: '',
+			boardViewId: '',
 			app: '',
 			icon: '',
 			title: ''

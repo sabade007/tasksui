@@ -79,7 +79,7 @@ export const useBoard: <T>() => shell.Board<T> = () => {
 		id: '',
 		title: '',
 		app: '',
-		url: '',
+		boardViewId: '',
 		icon: ''
 	};
 };

@@ -487,7 +487,7 @@ describe('Task view', () => {
 
 			jest.spyOn(shell, 'getBoardById').mockReturnValue({
 				id: `edit-task-${task.id}`,
-				url: '',
+				boardViewId: '',
 				app: '',
 				icon: '',
 				title: ''

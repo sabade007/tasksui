@@ -118,7 +118,7 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 		} else {
 			addBoard({
 				id: `edit-task-${task.id}`,
-				url: `${TASKS_ROUTE}/edit`,
+				boardViewId: `${TASKS_ROUTE}/edit`,
 				title: t('board.editTask.title', 'Edit Task'),
 				context: { taskId: task.id }
 			});
