@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Container, Icon, IconButton, Row, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Icon, Button, Row, Tooltip } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -69,12 +69,24 @@ const ReminderItem = ({
 			<Row flexShrink={0} minWidth={'fit'}>
 				{status === Status.Complete && (
 					<Tooltip label={t('action.undo')}>
-						<IconButton onClick={undoCompleteAction} icon={'UndoOutline'} size={'large'} />
+						<Button
+							type={'ghost'}
+							color={'text'}
+							onClick={undoCompleteAction}
+							icon={'UndoOutline'}
+							size={'large'}
+						/>
 					</Tooltip>
 				)}
 				{status !== Status.Complete && (
 					<Tooltip label={t('action.complete')}>
-						<IconButton onClick={completeAction} icon={'CheckmarkCircleOutline'} size={'large'} />
+						<Button
+							type={'ghost'}
+							color={'text'}
+							onClick={completeAction}
+							icon={'CheckmarkCircleOutline'}
+							size={'large'}
+						/>
 					</Tooltip>
 				)}
 			</Row>
