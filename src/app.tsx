@@ -13,8 +13,7 @@ import {
 	addRoute,
 	registerActions,
 	type SecondaryBarComponentProps,
-	Spinner,
-	upsertApp
+	Spinner
 } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 import { Route } from 'react-router-dom';
@@ -80,11 +79,7 @@ const App = (): React.ReactNode => {
 			secondaryBar: SecondaryBarView,
 			appView: AppView
 		});
-		upsertApp({
-			name: TASKS_APP_ID,
-			display: appNameLabel,
-			description: t('label.app_description', 'Tasks module')
-		});
+
 		// boards
 		addBoardView({
 			id: `${TASKS_ROUTE}/new`,
