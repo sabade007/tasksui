@@ -5,7 +5,7 @@
  */
 import React, { useCallback } from 'react';
 
-import { Container, Divider, Icon, IconButton } from '@zextras/carbonio-design-system';
+import { Container, Divider, Icon, Button } from '@zextras/carbonio-design-system';
 
 import { Text } from './Text';
 import { Status } from '../gql/types';
@@ -40,7 +40,13 @@ export const DisplayerHeader = ({ title, status }: DisplayerHeaderProps): React.
 				)}
 				<Text withTooltip>{title}</Text>
 				<Container margin={{ left: 'auto' }} width={'fit'} height={'fit'} flexShrink={0}>
-					<IconButton icon={'CloseOutline'} size={'medium'} onClick={closeDisplayer} />
+					<Button
+						type={'ghost'}
+						color={'text'}
+						icon={'CloseOutline'}
+						size={'medium'}
+						onClick={closeDisplayer}
+					/>
 				</Container>
 			</Container>
 			<Divider color={'gray3'} />

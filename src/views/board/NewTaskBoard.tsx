@@ -46,7 +46,7 @@ const NewTaskBoard = (): React.JSX.Element => {
 			if (tasks.length >= MAX_TASKS_LIMIT) {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'warning',
+					severity: 'warning',
 					label: t(
 						'snackbar.tasksLimitReached',
 						'You have reached your 200 tasks. Delete your previous tasks to create more.'

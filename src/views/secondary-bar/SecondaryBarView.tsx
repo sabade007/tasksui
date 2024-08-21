@@ -10,22 +10,22 @@ import {
 	Accordion,
 	type AccordionItemType,
 	Container,
-	IconButton,
+	Button,
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useUserAccount } from '@zextras/carbonio-shell-ui';
-import { flatMap, map, noop } from 'lodash';
+import { flatMap, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 function buildCollapsedItem(item: AccordionItemType): React.JSX.Element[] {
 	const element = (
 		<Tooltip label={item.label}>
-			<IconButton
-				customSize={{ iconSize: 'large', paddingSize: 'small' }}
-				icon={item.icon || ''}
-				onClick={item.onClick || noop}
-				backgroundColor={(item.active && 'highlight') || undefined}
-				iconColor={item.iconColor}
+			<Button
+				size={'extralarge'}
+				icon={item.icon ?? ''}
+				onClick={item.onClick ?? ((): void => undefined)}
+				backgroundColor={(item.active && 'highlight') || 'transparent'}
+				labelColor={item.iconColor ?? 'text'}
 			/>
 		</Tooltip>
 	);

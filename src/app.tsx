@@ -82,11 +82,11 @@ const App = (): React.ReactNode => {
 
 		// boards
 		addBoardView({
-			route: `${TASKS_ROUTE}/new`,
+			id: `${TASKS_ROUTE}/new`,
 			component: NewTaskBoardView
 		});
 		addBoardView({
-			route: `${TASKS_ROUTE}/edit`,
+			id: `${TASKS_ROUTE}/edit`,
 			component: EditTaskBoardView
 		});
 	}, [t]);
@@ -101,7 +101,10 @@ const App = (): React.ReactNode => {
 				label: t('label.new', 'New Task'),
 				icon: 'CheckmarkCircle2Outline',
 				onClick: (): void => {
-					addBoard({ url: `${TASKS_ROUTE}/new`, title: t('board.newTask.title', 'New Task') });
+					addBoard({
+						boardViewId: `${TASKS_ROUTE}/new`,
+						title: t('board.newTask.title', 'New Task')
+					});
 				},
 				disabled: false,
 				primary: true,

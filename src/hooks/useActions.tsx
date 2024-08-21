@@ -34,7 +34,7 @@ function getSnackbarTitle(title: string): string {
 export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[] => {
 	const { id, title, status } = task;
 	const [t] = useTranslation();
-	const createModal = useModal();
+	const { createModal, closeModal } = useModal();
 
 	const createSnackbar = useSnackbar();
 	const completeAction = useCompleteAction(id);
@@ -42,7 +42,9 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 	const trashAction = useTrashAction(id);
 
 	const openDeleteModal = useCallback(() => {
-		const closeModal = createModal({
+		const modalId = 'delete-task-modal';
+		createModal({
+			id: modalId,
 			title: t('modal.delete.header', 'This action is irreversible'),
 			size: 'medium',
 			confirmLabel: t('modal.delete.button.confirm', 'Delete permanently'),
@@ -54,9 +56,9 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 					if (board) {
 						closeBoard(boardId);
 					}
-					closeModal();
+					closeModal(modalId);
 					createSnackbar({
-						type: 'success',
+						severity: 'success',
 						key: `snackbar-${Date.now()}`,
 						label: t('snackbar.permanentlyDeletedTask', 'Task permanently deleted'),
 						hideButton: true
@@ -65,7 +67,7 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 			},
 			showCloseIcon: true,
 			onClose: () => {
-				closeModal();
+				closeModal(modalId);
 			},
 			children: (
 				<Container padding={{ vertical: 'large' }}>
@@ -78,12 +80,12 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 				</Container>
 			)
 		});
-	}, [createModal, createSnackbar, t, task.id, trashAction]);
+	}, [closeModal, createModal, createSnackbar, t, task.id, trashAction]);
 
 	const reopenActionHandler = useCallback(() => {
 		reopenAction().then(() => {
 			createSnackbar({
-				type: 'success',
+				severity: 'success',
 				key: `snackbar-${Date.now()}`,
 				label: t('snackbar.uncompleteTask', 'Task "{{taskTitle}}" uncompleted', {
 					replace: {
@@ -98,7 +100,7 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 	const completeActionHandler = useCallback(() => {
 		completeAction().then(() => {
 			createSnackbar({
-				type: 'success',
+				severity: 'success',
 				key: `snackbar-${Date.now()}`,
 				label: t('snackbar.completeTask', 'Task "{{taskTitle}}" completed', {
 					replace: {
@@ -118,7 +120,7 @@ export const useActions = (task: Pick<Task, 'id' | 'title' | 'status'>): Action[
 		} else {
 			addBoard({
 				id: `edit-task-${task.id}`,
-				url: `${TASKS_ROUTE}/edit`,
+				boardViewId: `${TASKS_ROUTE}/edit`,
 				title: t('board.editTask.title', 'Edit Task'),
 				context: { taskId: task.id }
 			});
