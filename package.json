@@ -71,7 +71,7 @@
 		"@apollo/client": "~3.10.8",
 		"@zextras/carbonio-design-system": "^7.1.1",
 		"@zextras/carbonio-shell-ui": "8.0.0",
-		"core-js": "^3.38.0",
+		"core-js": "^3.38.1",
 		"date-fns": "^2.30.0",
 		"graphql": "^16.9.0",
 		"i18next": "^22.5.1",
